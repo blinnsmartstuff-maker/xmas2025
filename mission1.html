@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[SYSTEM RESTORED...]</title>
+<link rel="stylesheet" href="transmission-style.css">
+</head>
+<body>
+<canvas id="snow"></canvas>
+<audio id="beep" src="transmission-beep.wav" preload="auto"></audio>
+<div class="container">
+  <div class="header">[SYSTEM RESTORED...]</div>
+  <div class="title">Naughty/Nice Algorithm Reboot Successful</div>
+  <p class="body">Excellent work, Agents. The global gift registry is back online.<br>Holiday cheer levels are stabilizing across major time zones.<br><br>Your next objective: Identify the rogue elf responsible for the sabotage.<br>Trust no one. Proceed with caution.</p>
+  <p class="footer small">North Pole Command • NPIA Secure Broadcast</p>
+</div>
+<div id="end" class="endscreen">TRANSMISSION ENDED</div>
+<script src="snow.js"></script>
+<script>
+(function(){
+  const audio = document.getElementById('beep');
+  const tryPlay = ()=> audio.play().catch(()=>{});
+  document.addEventListener('click', tryPlay, {once:true});
+  document.addEventListener('touchstart', tryPlay, {once:true});
+  window.addEventListener('load', tryPlay);
+  setTimeout(()=>{
+    const end = document.getElementById('end');
+    end.style.opacity = 1;
+  }, 30000);
+})();
+</script>
+</body>
+</html>

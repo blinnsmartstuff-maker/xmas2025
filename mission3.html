@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[NAVIGATION ONLINE...]</title>
+<link rel="stylesheet" href="transmission-style.css">
+</head>
+<body>
+<canvas id="snow"></canvas>
+<audio id="beep" src="transmission-beep.wav" preload="auto"></audio>
+<div class="container">
+  <div class="header">[NAVIGATION ONLINE...]</div>
+  <div class="title">Sleigh Flight Path Successfully Recovered</div>
+  <p class="body">Tremendous progress, Agents. The reindeer are warming up the launch bay.<br>Weather satellites confirm clear skies across the Northern Hemisphere.<br><br>One last task remains — reactivate the power cores and prepare for launch.</p>
+  <p class="footer small">North Pole Command • NPIA Secure Broadcast</p>
+</div>
+<div id="end" class="endscreen">TRANSMISSION ENDED</div>
+<script src="snow.js"></script>
+<script>
+(function(){
+  const audio = document.getElementById('beep');
+  const tryPlay = ()=> audio.play().catch(()=>{});
+  document.addEventListener('click', tryPlay, {once:true});
+  document.addEventListener('touchstart', tryPlay, {once:true});
+  window.addEventListener('load', tryPlay);
+  setTimeout(()=>{
+    const end = document.getElementById('end');
+    end.style.opacity = 1;
+  }, 30000);
+})();
+</script>
+</body>
+</html>
