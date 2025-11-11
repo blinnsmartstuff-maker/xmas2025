@@ -12,3 +12,53 @@ h1,h2,p{ margin:0.6rem 0;}
 canvas#snow{ position:absolute; inset:0; z-index:1; pointer-events:none;}
 @keyframes flicker{ 0%{opacity:1;} 41%{opacity:0.96;} 42%{opacity:0.82;} 45%{opacity:0.98;} 60%{opacity:0.90;} 61%{opacity:1;} 100%{opacity:0.98;} }
 .small{ font-size:0.9em; opacity:0.85;}
+/* ===== Improved Typography for TV Displays ===== */
+
+/* Scale base font to screen size */
+html, body {
+  font-size: clamp(14px, 2vw, 20px);
+  line-height: 1.6;
+  padding: 0;
+  margin: 0;
+}
+
+/* Header flicker text */
+#incomingBanner {
+  font-size: clamp(22px, 4vw, 56px);
+  margin-bottom: 1.2em;
+}
+
+/* Main mission title */
+.title {
+  font-size: clamp(28px, 4.5vw, 68px);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0.5em 0 0.6em 0;
+}
+
+/* Body paragraphs */
+.body {
+  max-width: 75ch;
+  font-size: clamp(16px, 2vw, 26px);
+  line-height: 1.55;
+  margin: 0 auto;
+}
+
+/* Footer tagline */
+.footer {
+  margin-top: 1.5em;
+  font-size: clamp(12px, 1.5vw, 18px);
+  opacity: 0.75;
+}
+
+/* Container centering */
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 4vh 6vw;
+  text-align: center;
+}
+
