@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>[INCOMING TRANSMISSION...]</title>
+<title>North Pole Intelligence Agency – Priority One Alert</title>
 <link rel="stylesheet" href="transmission-style.css">
 <style>
 @keyframes screenFlicker {
@@ -13,7 +13,7 @@
 .flicker { animation: screenFlicker 1.5s linear; }
 .blackout { background:#000 !important; transition:background 2s ease,opacity 1.5s ease; }
 
-#startOverlay, #incomingBanner, #end {
+#startOverlay, #end {
   font-weight: 800;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -29,14 +29,6 @@
   z-index:10; cursor:pointer;
   text-align:center;
 }
-
-/* Incoming Transmission banner */
-#incomingBanner {
-  color:#fff;
-  font-size:clamp(24px,5vw,60px);
-  text-align:center;
-  margin-bottom:1em;
-}
 </style>
 </head>
 <body>
@@ -47,7 +39,6 @@
 <audio id="beep" src="speech_20251111195406392.mp3" preload="auto"></audio>
 
 <div class="container" id="content">
-  <div id="incomingBanner" class="flicker">[INCOMING TRANSMISSION...]</div>
   <div class="title">North Pole Intelligence Agency – Priority One Alert</div>
   <p class="body">
     Agents, the Christmas Delivery Command has been compromised.<br>
@@ -70,16 +61,16 @@
   const end = document.getElementById('end');
   const snow = document.getElementById('snow');
   const overlay = document.getElementById('startOverlay');
-  const incoming = document.getElementById('incomingBanner');
 
   overlay.addEventListener('click', () => {
     overlay.style.display = 'none';
     try { audio.play(); } catch(e){}
-    // Flicker start banner
-    incoming.classList.add('flicker');
-    setTimeout(()=>incoming.classList.remove('flicker'),1500);
 
-    // End sequence after 30s
+    // Flicker start effect
+    content.classList.add('flicker');
+    setTimeout(()=>content.classList.remove('flicker'),1500);
+
+    // End sequence after 30 seconds
     setTimeout(()=>{
       content.classList.add('flicker');
       setTimeout(()=>{
