@@ -25,7 +25,7 @@ body {
   align-items: center;
 }
 
-/* ===== FIRE TV SAFE FLEX LAYOUT ===== */
+/* Container layout tuned for TVs */
 .container {
   position: relative;
   z-index: 2;
@@ -40,18 +40,6 @@ body {
   text-align: center;
   overflow-y: auto; /* allows gentle scroll if overscan trims edges */
   box-sizing: border-box;
-}
-
-/* Header / flicker banner */
-#incomingBanner {
-  font-size: clamp(22px, 4vw, 56px);
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  margin-top: 0;
-  margin-bottom: 0.8em;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
-  animation: flicker 2.8s infinite;
 }
 
 /* Main mission title */

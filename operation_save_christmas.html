@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Operation Save Christmas – Mission Control</title>
+<link rel="stylesheet" href="operation.css">
+</head>
+<body>
+<div id="countdown"></div>
+
+<h1 id="header">Operation: Save Christmas</h1>
+<p id="subtitle">North Pole Intelligence Agency · Live Mission Status</p>
+
+<div id="tracker">
+  <div class="step" data-step="1">
+    <img src="candycane_empty.svg" class="icon">
+    <div class="text">
+      <div class="label">Algorithm Restored</div>
+      <div class="desc">Reboot the Naughty/Nice core and stabilize the system.</div>
+    </div>
+  </div>
+  <div class="step" data-step="2">
+    <img src="candycane_empty.svg" class="icon">
+    <div class="text">
+      <div class="label">Rogue Elf Apprehended</div>
+      <div class="desc">Identify and contain the saboteur hiding among the gifts.</div>
+    </div>
+  </div>
+  <div class="step" data-step="3">
+    <img src="candycane_empty.svg" class="icon">
+    <div class="text">
+      <div class="label">Flight Path Restored</div>
+      <div class="desc">Reconstruct Santa's global route before takeoff.</div>
+    </div>
+  </div>
+  <div class="step" data-step="4">
+    <img src="candycane_empty.svg" class="icon">
+    <div class="text">
+      <div class="label">Santa Cleared for Takeoff</div>
+      <div class="desc">Power the sleigh, lock in coordinates, and launch.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Read stage from URL (?stage=0–4)
+const params = new URLSearchParams(window.location.search);
+const stage = parseInt(params.get('stage') || '0', 10);
+
+// Background colors per stage
+const colors = {
+  0: '#7a0b12', // red alert
+  1: '#006b2d', // green
+  2: '#0057a4', // blue
+  3: '#b8860b', // gold
+  4: '#ffffff'  // final white
+};
+const textColors = {
+  0: '#f2f2f2',
+  1: '#f2f2f2',
+  2: '#f2f2f2',
+  3: '#1b1200',
+  4: '#111111'
+};
+
+const clamped = Math.max(0, Math.min(4, isNaN(stage) ? 0 : stage));
+document.body.style.background = colors[clamped];
+document.body.style.color = textColors[clamped];
+
+// Update tracker icons
+document.querySelectorAll('.step').forEach(s=>{
+  const num = parseInt(s.dataset.step, 10);
+  const icon = s.querySelector('img');
+  if(num <= clamped){
+    s.classList.add('done');
+    if(icon) icon.src = 'candycane_full.svg';
+  } else {
+    s.classList.remove('done');
+    if(icon) icon.src = 'candycane_empty.svg';
+  }
+});
+
+// Countdown to midnight America/Chicago
+function updateClock(){
+  const now = new Date();
+  const cst = new Date(now.toLocaleString('en-US', {timeZone:'America/Chicago'}));
+  const midnight = new Date(cst);
+  midnight.setHours(24,0,0,0);
+  const diff = midnight - cst;
+  if (diff <= 0) {
+    document.getElementById('countdown').textContent = "00:00:00 until midnight";
+    return;
+  }
+  const h = Math.floor(diff/3600000);
+  const m = Math.floor((diff % 3600000)/60000);
+  const s = Math.floor((diff % 60000)/1000);
+  document.getElementById('countdown').textContent =
+    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} until midnight`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+</body>
+</html>
