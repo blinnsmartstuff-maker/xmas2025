@@ -77,157 +77,158 @@
 </div>
 
 <script>
-// ============================
-// Stage handling with overrides
-// ============================
-const params = new URLSearchParams(window.location.search);
-const stageRaw = (params.get('stage') || '').toString().trim().toLowerCase();
+(function() {
+  // ============================
+  // Stage handling with overrides
+  // ============================
+  const params = new URLSearchParams(window.location.search);
+  const stageRaw = (params.get('stage') || '').toString().trim().toLowerCase();
 
-const successOverlay = document.getElementById('successOverlay');
-const failureOverlay = document.getElementById('failureOverlay');
-let endStateShown = false;
+  const successOverlay = document.getElementById('successOverlay');
+  const failureOverlay = document.getElementById('failureOverlay');
+  let endStateShown = false;
 
-// ---- Override: stage=success ----
-if (stageRaw === 'success') {
-  runSuccessOverride();
-  return;
-}
+  // ---- Override: stage=success ----
+  if (stageRaw === 'success') {
+    runSuccessOverride();
+    return;
+  }
 
-// ---- Override: stage=failure ----
-if (stageRaw === 'failure') {
-  runFailureOverride();
-  return;
-}
+  // ---- Override: stage=failure ----
+  if (stageRaw === 'failure') {
+    runFailureOverride();
+    return;
+  }
 
-// ---- Otherwise: normal numeric stage (0–4) ----
-runNormalStage(stageRaw);
+  // ---- Otherwise: normal numeric stage (0–4) ----
+  runNormalStage(stageRaw);
 
-// ============================
-// Normal Stage Flow (0–4)
-// ============================
-function runNormalStage(stageRaw) {
-  const stageNum = parseInt(stageRaw || '0', 10);
+  // ============================
+  // Normal Stage Flow (0–4)
+  // ============================
+  function runNormalStage(stageRaw) {
+    const stageNum = parseInt(stageRaw || '0', 10);
 
-  // Swapped colors: Stage 1 = gold, Stage 3 = green
-  const colors = {
-    0: '#7a0b12', // red alert
-    1: '#b8860b', // gold (Stage 1)
-    2: '#0057a4', // blue
-    3: '#006b2d', // green (Stage 3)
-    4: '#ffffff'  // white final
-  };
+    // Swapped colors: Stage 1 = gold, Stage 3 = green
+    const colors = {
+      0: '#7a0b12', // red alert
+      1: '#b8860b', // gold (Stage 1)
+      2: '#0057a4', // blue
+      3: '#006b2d', // green (Stage 3)
+      4: '#ffffff'  // white final
+    };
 
-  const textColors = {
-    0: '#f2f2f2',
-    1: '#f2f2f2',
-    2: '#f2f2f2',
-    3: '#f2f2f2',
-    4: '#111111'
-  };
+    const textColors = {
+      0: '#f2f2f2',
+      1: '#f2f2f2',
+      2: '#f2f2f2',
+      3: '#f2f2f2',
+      4: '#111111'
+    };
 
-  const clamped = Math.max(0, Math.min(4, isNaN(stageNum) ? 0 : stageNum));
+    const clamped = Math.max(0, Math.min(4, isNaN(stageNum) ? 0 : stageNum));
 
-  document.body.style.background = colors[clamped];
-  document.body.style.color = textColors[clamped];
+    document.body.style.background = colors[clamped];
+    document.body.style.color = textColors[clamped];
 
-  // Update tracker candy canes (done vs not done)
-  document.querySelectorAll('.step').forEach(step => {
-    const num = parseInt(step.dataset.step, 10);
-    if (num <= clamped) {
-      step.classList.add('done');
-    } else {
-      step.classList.remove('done');
+    // Update tracker candy canes
+    document.querySelectorAll('.step').forEach(step => {
+      const num = parseInt(step.dataset.step, 10);
+      if (num <= clamped) step.classList.add('done');
+      else step.classList.remove('done');
+    });
+
+    // Auto-success if stage=4
+    if (clamped === 4) {
+      setTimeout(() => showSuccess(), 4000);
     }
-  });
 
-  // Auto-success if stage=4
-  if (clamped === 4) {
-    setTimeout(() => showSuccess(), 4000);
+    // ============================
+    // Countdown to Midnight CST
+    // ============================
+    function updateClock(){
+      const now = new Date();
+      const cst = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
+      const midnight = new Date(cst);
+      midnight.setHours(24,0,0,0);
+
+      const diff = midnight - cst;
+      const el = document.getElementById("countdown");
+
+      if (diff <= 0) {
+        el.textContent = "00:00:00 until midnight";
+
+        if (clamped < 4) showFailure();
+        else showSuccess();
+
+        return;
+      }
+
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      el.textContent =
+        `${String(h).padStart(2,'0')}:` +
+        `${String(m).padStart(2,'0')}:` +
+        `${String(s).padStart(2,'0')} until midnight`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
   }
 
   // ============================
-  // Countdown to Midnight CST
+  // Override flows
   // ============================
-  function updateClock(){
-    const now = new Date();
-    const cst = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
-    const midnight = new Date(cst);
-    midnight.setHours(24,0,0,0);
+  function runSuccessOverride() {
+    document.body.style.background = "#0c6b2a";
+    document.body.style.color = "#ffffff";
+    disableTracker();
+    setFakeCountdown("SUCCESS MODE");
+    setTimeout(() => successOverlay.classList.add('visible'), 300);
+  }
 
-    const diff = midnight - cst;
+  function runFailureOverride() {
+    document.body.style.background = "#330000";
+    document.body.style.color = "#ffdddd";
+    disableTracker();
+    setFakeCountdown("FAILURE MODE");
+    setTimeout(() => failureOverlay.classList.add('visible'), 300);
+  }
+
+  // ============================
+  // Shared helpers
+  // ============================
+  function showSuccess() {
+    if (endStateShown) return;
+    endStateShown = true;
+    successOverlay.classList.add("visible");
+  }
+
+  function showFailure() {
+    if (endStateShown) return;
+    endStateShown = true;
+    failureOverlay.classList.add("visible");
+  }
+
+  function disableTracker() {
+    const tracker = document.getElementById("tracker");
+    const header = document.getElementById("header");
+    const subtitle = document.getElementById("subtitle");
+    if (tracker) tracker.classList.add('hidden');
+    if (header) header.classList.add('hidden');
+    if (subtitle) subtitle.classList.add('hidden');
+  }
+
+  function setFakeCountdown(text) {
     const el = document.getElementById("countdown");
-
-    if (diff <= 0) {
-      el.textContent = "00:00:00 until midnight";
-
-      if (clamped < 4) { showFailure(); }
-      else { showSuccess(); }
-
-      return;
-    }
-
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-
-    el.textContent =
-      `${String(h).padStart(2,'0')}:` +
-      `${String(m).padStart(2,'0')}:` +
-      `${String(s).padStart(2,'0')} until midnight`;
+    if (el) el.textContent = text;
   }
 
-  setInterval(updateClock, 1000);
-  updateClock();
-}
-
-// ============================
-// Override flows
-// ============================
-function runSuccessOverride() {
-  document.body.style.background = "#0c6b2a";
-  document.body.style.color = "#ffffff";
-  disableTracker();
-  setFakeCountdown("SUCCESS MODE");
-  setTimeout(() => successOverlay.classList.add('visible'), 300);
-}
-
-function runFailureOverride() {
-  document.body.style.background = "#330000";
-  document.body.style.color = "#ffdddd";
-  disableTracker();
-  setFakeCountdown("FAILURE MODE");
-  setTimeout(() => failureOverlay.classList.add('visible'), 300);
-}
-
-// ============================
-// Shared helpers
-// ============================
-function showSuccess() {
-  if (endStateShown) return;
-  endStateShown = true;
-  successOverlay.classList.add("visible");
-}
-
-function showFailure() {
-  if (endStateShown) return;
-  endStateShown = true;
-  failureOverlay.classList.add("visible");
-}
-
-function disableTracker() {
-  const tracker = document.getElementById("tracker");
-  const header = document.getElementById("header");
-  const subtitle = document.getElementById("subtitle");
-  if (tracker) tracker.classList.add('hidden');
-  if (header) header.classList.add('hidden');
-  if (subtitle) subtitle.classList.add('hidden');
-}
-
-function setFakeCountdown(text) {
-  const el = document.getElementById("countdown");
-  if (el) el.textContent = text;
-}
+})(); // <-- THIS closes the IIFE
 </script>
+
 
 </body>
 </html>
