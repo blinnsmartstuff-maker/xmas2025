@@ -38,7 +38,7 @@ body {
   max-height: 90vh;
   padding: 3vh 5vw;
   text-align: center;
-  overflow-y: auto; /* allows gentle scroll if overscan trims edges */
+  overflow-y: auto;
   box-sizing: border-box;
 }
 

@@ -97,27 +97,48 @@ body {
   opacity: 0.9;
 }
 
-/* Completed steps glow a bit more */
+/* Completed steps glow more */
 .step.done {
   opacity: 1;
   background: rgba(0, 0, 0, 0.35);
   box-shadow: 0 0 16px rgba(255, 255, 255, 0.35);
 }
 
-/* Candy cane icons */
+/* Candy cane icons using PNG */
 .icon.cane {
-  width: 54px;
-  height: 54px;
+  width: 60px;
+  height: auto;
   flex-shrink: 0;
+  transition: filter 0.4s ease, transform 0.3s ease;
 }
 
-/* Used when hiding tracker/header in override modes */
+/* INCOMPLETE: grey/dim cane */
+.step:not(.done) .icon.cane {
+  filter: grayscale(100%) brightness(0.65) opacity(0.45);
+}
+
+/* COMPLETE: full color + glow */
+.step.done .icon.cane {
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.75));
+  transform: translateY(-1px) scale(1.04);
+}
+
+/* If you want a gentle pulse, uncomment:
+@keyframes canePulse {
+  0%, 100% { transform: translateY(-1px) scale(1.03); }
+  50% { transform: translateY(-1px) scale(1.08); }
+}
+.step.done .icon.cane {
+  animation: canePulse 2s ease-in-out infinite;
+}
+*/
+
 .hidden {
   opacity: 0;
   transition: opacity 0.7s ease;
 }
 
-/* ===== Final success / failure overlays ===== */
+/* Final success / failure overlays */
 .finalscreen {
   position: fixed;
   inset: 0;
