@@ -60,37 +60,59 @@
 <script src="snow.js"></script>
 <script>
 (function() {
+  console.log('mission0 script loaded');
+
+  const TRANSMISSION_MS = 5000;   // 5 seconds for testing
+  const END_SCREEN_MS    = 3000;  // 3 seconds on "TRANSMISSION ENDED" for testing
+
   const audio   = document.getElementById('beep');
   const content = document.getElementById('content');
   const end     = document.getElementById('end');
   const snow    = document.getElementById('snow');
   const overlay = document.getElementById('startOverlay');
 
-  if (!overlay) return; // safety
+  if (!overlay) {
+    console.warn('startOverlay not found');
+    return;
+  }
 
   overlay.addEventListener('click', () => {
+    console.log('overlay clicked');
+
     // hide overlay
     overlay.style.display = 'none';
 
-    // try to play audio (may require user gesture – we have it)
-    try { audio && audio.play(); } catch(e){}
-
-    // small flicker on content at start
-    if (content) {
-      content.classList.add('flicker');
-      setTimeout(() => content.classList.remove('flicker'), 1500);
+    // attempt audio
+    if (audio) {
+      audio.play().then(
+        () => console.log('audio playing'),
+        (err) => console.warn('audio play blocked or failed', err)
+      );
     }
 
-    // End sequence after ~30s of "transmission"
+    // quick flicker on content
+    if (content) {
+      content.classList.add('flicker');
+      setTimeout(() => {
+        content.classList.remove('flicker');
+        console.log('initial flicker done');
+      }, 1500);
+    }
+
+    // End sequence after TRANSMISSION_MS
     setTimeout(() => {
+      console.log('starting end sequence');
+
       if (content) content.classList.add('flicker');
 
       setTimeout(() => {
+        console.log('blackout + hide content + stop snow');
         document.body.classList.add('blackout');
         if (content) content.style.opacity = 0;
         if (snow) snow.style.display = 'none';
 
         setTimeout(() => {
+          console.log('show TRANSMISSION ENDED');
           if (end) {
             end.style.background = '#000';
             end.style.color = '#fff';
@@ -98,14 +120,15 @@
             end.classList.add('flicker');
           }
 
-          // Auto-redirect to Mission Control after 10 seconds
+          // Redirect after END_SCREEN_MS
           setTimeout(() => {
+            console.log('redirecting to mission control stage=0');
             window.location.href = 'operation_save_christmas.html?stage=0';
-          }, 10000);
+          }, END_SCREEN_MS);
 
         }, 1500);
       }, 1200);
-    }, 30000);
+    }, TRANSMISSION_MS);
   });
 })();
 </script>
