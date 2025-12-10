@@ -78,38 +78,35 @@
 
 <script>
 // ============================
-// Read stage (?stage=0–4, success, failure)
+// Stage handling with overrides
 // ============================
 const params = new URLSearchParams(window.location.search);
-let stageParam = params.get('stage');
+const stageRaw = (params.get('stage') || '').toString().trim().toLowerCase();
 
 const successOverlay = document.getElementById('successOverlay');
 const failureOverlay = document.getElementById('failureOverlay');
 let endStateShown = false;
 
+// ---- Override: stage=success ----
+if (stageRaw === 'success') {
+  runSuccessOverride();
+  return;
+}
+
+// ---- Override: stage=failure ----
+if (stageRaw === 'failure') {
+  runFailureOverride();
+  return;
+}
+
+// ---- Otherwise: normal numeric stage (0–4) ----
+runNormalStage(stageRaw);
+
 // ============================
-// Override: stage=success
+// Normal Stage Flow (0–4)
 // ============================
-if (stageParam === "success") {
-  document.body.style.background = "#0c6b2a";
-  document.body.style.color = "#ffffff";
-  disableTracker();
-  setFakeCountdown("SUCCESS MODE");
-  setTimeout(() => successOverlay.classList.add('visible'), 300);
-} else if (stageParam === "failure") {
-  // ============================
-  // Override: stage=failure
-  // ============================
-  document.body.style.background = "#330000";
-  document.body.style.color = "#ffdddd";
-  disableTracker();
-  setFakeCountdown("FAILURE MODE");
-  setTimeout(() => failureOverlay.classList.add('visible'), 300);
-} else {
-  // ============================
-  // Normal Stage Handling (0–4)
-  // ============================
-  const stage = parseInt(stageParam || "0", 10);
+function runNormalStage(stageRaw) {
+  const stageNum = parseInt(stageRaw || '0', 10);
 
   // Swapped colors: Stage 1 = gold, Stage 3 = green
   const colors = {
@@ -128,11 +125,12 @@ if (stageParam === "success") {
     4: '#111111'
   };
 
-  const clamped = Math.max(0, Math.min(4, isNaN(stage) ? 0 : stage));
+  const clamped = Math.max(0, Math.min(4, isNaN(stageNum) ? 0 : stageNum));
+
   document.body.style.background = colors[clamped];
   document.body.style.color = textColors[clamped];
 
-  // Fill tracker candy canes
+  // Update tracker candy canes (done vs not done)
   document.querySelectorAll('.step').forEach(step => {
     const num = parseInt(step.dataset.step, 10);
     if (num <= clamped) {
@@ -183,7 +181,26 @@ if (stageParam === "success") {
 }
 
 // ============================
-// Shared helper functions
+// Override flows
+// ============================
+function runSuccessOverride() {
+  document.body.style.background = "#0c6b2a";
+  document.body.style.color = "#ffffff";
+  disableTracker();
+  setFakeCountdown("SUCCESS MODE");
+  setTimeout(() => successOverlay.classList.add('visible'), 300);
+}
+
+function runFailureOverride() {
+  document.body.style.background = "#330000";
+  document.body.style.color = "#ffdddd";
+  disableTracker();
+  setFakeCountdown("FAILURE MODE");
+  setTimeout(() => failureOverlay.classList.add('visible'), 300);
+}
+
+// ============================
+// Shared helpers
 // ============================
 function showSuccess() {
   if (endStateShown) return;
@@ -211,5 +228,6 @@ function setFakeCountdown(text) {
   if (el) el.textContent = text;
 }
 </script>
+
 </body>
 </html>
