@@ -3,12 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
+<!-- Prevent caching on Fire TV / browsers -->
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+
 <title>Operation Save Christmas – Mission Control</title>
 <link rel="stylesheet" href="operation.css">
 </head>
+
 <body>
 <div id="countdown"></div>
 
@@ -23,6 +27,7 @@
       <div class="desc">Reboot the Naughty/Nice core and stabilize the system.</div>
     </div>
   </div>
+
   <div class="step" data-step="2">
     <img src="candycane_empty.svg" class="icon">
     <div class="text">
@@ -30,13 +35,15 @@
       <div class="desc">Identify and contain the saboteur hiding among the gifts.</div>
     </div>
   </div>
+
   <div class="step" data-step="3">
     <img src="candycane_empty.svg" class="icon">
     <div class="text">
       <div class="label">Flight Path Restored</div>
-      <div class="desc">Reconstruct Santa's global route before takeoff.</div>
+      <div class="desc">Reconstruct Santa’s global route before takeoff.</div>
     </div>
   </div>
+
   <div class="step" data-step="4">
     <img src="candycane_empty.svg" class="icon">
     <div class="text">
@@ -46,19 +53,80 @@
   </div>
 </div>
 
-<script>
-// Read stage from URL (?stage=0–4)
-const params = new URLSearchParams(window.location.search);
-const stage = parseInt(params.get('stage') || '0', 10);
+<!-- ============================ -->
+<!-- SUCCESS OVERLAY -->
+<!-- ============================ -->
+<div id="successOverlay" class="finalscreen success">
+  <div class="final-inner">
+    <h2>MISSION ACCOMPLISHED</h2>
+    <p>All systems restored before midnight.<br>
+    Santa is cleared for takeoff.<br>
+    Christmas is saved.</p>
+  </div>
+</div>
 
-// Background colors per stage
+<!-- ============================ -->
+<!-- FAILURE OVERLAY -->
+<!-- ============================ -->
+<div id="failureOverlay" class="finalscreen failure">
+  <div class="final-inner">
+    <h2>MISSION FAILED</h2>
+    <p>The countdown reached zero before all systems were online.<br>
+    Santa’s launch has been scrubbed.</p>
+  </div>
+</div>
+
+<script>
+// ============================
+// Read stage query param
+// ============================
+const params = new URLSearchParams(window.location.search);
+let stageParam = params.get('stage');
+
+// Overlays
+const successOverlay = document.getElementById('successOverlay');
+const failureOverlay = document.getElementById('failureOverlay');
+let endStateShown = false;
+
+// ============================
+// Override: stage=success
+// ============================
+if (stageParam === "success") {
+  document.body.style.background = "#0c6b2a";
+  document.body.style.color = "#ffffff";
+  disableTracker();
+  setFakeCountdown("SUCCESS MODE");
+  setTimeout(() => successOverlay.classList.add('visible'), 300);
+  return;
+}
+
+// ============================
+// Override: stage=failure
+// ============================
+if (stageParam === "failure") {
+  document.body.style.background = "#330000";
+  document.body.style.color = "#ffdddd";
+  disableTracker();
+  setFakeCountdown("FAILURE MODE");
+  setTimeout(() => failureOverlay.classList.add('visible'), 300);
+  return;
+}
+
+// ============================
+// Normal Stage Handling (0–4)
+// ============================
+const stage = parseInt(stageParam || "0", 10);
+
+// Swapped Stage 1 and Stage 3 colors
 const colors = {
   0: '#7a0b12', // red alert
-  1: '#006b2d', // green
+  1: '#b8860b', // gold (new for Stage 1)
   2: '#0057a4', // blue
-  3: '#b8860b', // gold
-  4: '#ffffff'  // final white
+  3: '#006b2d', // green (new for Stage 3)
+  4: '#ffffff'  // white (final)
 };
+
+
 const textColors = {
   0: '#f2f2f2',
   1: '#f2f2f2',
@@ -71,38 +139,84 @@ const clamped = Math.max(0, Math.min(4, isNaN(stage) ? 0 : stage));
 document.body.style.background = colors[clamped];
 document.body.style.color = textColors[clamped];
 
-// Update tracker icons
-document.querySelectorAll('.step').forEach(s=>{
-  const num = parseInt(s.dataset.step, 10);
-  const icon = s.querySelector('img');
-  if(num <= clamped){
-    s.classList.add('done');
-    if(icon) icon.src = 'candycane_full.svg';
+// Fill tracker icons
+document.querySelectorAll('.step').forEach(step => {
+  const num = parseInt(step.dataset.step, 10);
+  const icon = step.querySelector('img');
+
+  if (num <= clamped) {
+    step.classList.add('done');
+    icon.src = "candycane_full.svg";
   } else {
-    s.classList.remove('done');
-    if(icon) icon.src = 'candycane_empty.svg';
+    step.classList.remove('done');
+    icon.src = "candycane_empty.svg";
   }
 });
 
-// Countdown to midnight America/Chicago
+// Auto-success if stage=4
+if (clamped === 4) {
+  setTimeout(() => showSuccess(), 4000);
+}
+
+// ============================
+// Countdown to Midnight CST
+// ============================
 function updateClock(){
   const now = new Date();
-  const cst = new Date(now.toLocaleString('en-US', {timeZone:'America/Chicago'}));
+  const cst = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
   const midnight = new Date(cst);
   midnight.setHours(24,0,0,0);
+
   const diff = midnight - cst;
+  const el = document.getElementById("countdown");
+
   if (diff <= 0) {
-    document.getElementById('countdown').textContent = "00:00:00 until midnight";
+    el.textContent = "00:00:00 until midnight";
+    
+    if (clamped < 4) { showFailure(); }
+    else { showSuccess(); }
+
     return;
   }
-  const h = Math.floor(diff/3600000);
-  const m = Math.floor((diff % 3600000)/60000);
-  const s = Math.floor((diff % 60000)/1000);
-  document.getElementById('countdown').textContent =
-    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} until midnight`;
+
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+
+  el.textContent =
+    `${String(h).padStart(2,'0')}:` +
+    `${String(m).padStart(2,'0')}:` +
+    `${String(s).padStart(2,'0')} until midnight`;
 }
+
 setInterval(updateClock, 1000);
 updateClock();
+
+// ============================
+// Helper Functions
+// ============================
+function showSuccess() {
+  if (endStateShown) return;
+  endStateShown = true;
+  successOverlay.classList.add("visible");
+}
+
+function showFailure() {
+  if (endStateShown) return;
+  endStateShown = true;
+  failureOverlay.classList.add("visible");
+}
+
+function disableTracker() {
+  document.getElementById("tracker").style.opacity = 0;
+  document.getElementById("header").style.opacity = 0;
+  document.getElementById("subtitle").style.opacity = 0;
+}
+
+function setFakeCountdown(text) {
+  const el = document.getElementById("countdown");
+  if (el) el.textContent = text;
+}
 </script>
 </body>
 </html>
