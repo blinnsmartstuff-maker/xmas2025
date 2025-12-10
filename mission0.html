@@ -1,135 +1,5 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>North Pole Intelligence Agency – Priority One Alert</title>
-  <link rel="stylesheet" href="transmission-style.css">
-  <style>
-    @keyframes screenFlicker {
-
-      0%,
-      18%,
-      22%,
-      25%,
-      53%,
-      57%,
-      100% {
-        opacity: 1;
-      }
-
-      20%,
-      24%,
-      55% {
-        opacity: 0;
-      }
-    }
-
-    .flicker {
-      animation: screenFlicker 1.5s linear;
-    }
-
-    .blackout {
-      background: #000 !important;
-      transition: background 2s ease, opacity 1.5s ease;
-    }
-
-    #startOverlay,
-    #end {
-      font-weight: 800;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      text-shadow: 0 0 14px rgba(255, 255, 255, 0.25);
-    }
-
-    /* Overlay to begin */
-    #startOverlay {
-      position: fixed;
-      inset: 0;
-      background: #000;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: clamp(24px, 5vw, 60px);
-      z-index: 10;
-      cursor: pointer;
-      text-align: center;
-    }
-  </style>
-</head>
-
-<body>
-  <!-- Tap-to-begin overlay -->
-  <div id="startOverlay" class="flicker">TAP TO START TRANSMISSION</div>
-
-  <canvas id="snow"></canvas>
-  <!-- Replace src with your actual elf-voice MP3 file if different -->
-  <audio id="beep" src="speech_20251111195406392.mp3" preload="auto"></audio>
-
-  <div class="container" id="content">
-    <div class="title">North Pole Intelligence Agency – Priority One Alert</div>
-    <p class="body">
-      Agents, the Christmas Delivery Command has been compromised.<br>
-      The Naughty/Nice Algorithm has been infected with rogue code.<br>
-      Reindeer launch systems are offline.<br><br>
-      Your objective: Restore all systems before midnight.<br>
-      Collect clues, decode transmissions, and neutralize the saboteur.<br><br>
-      Await further instructions. Christmas depends on you.
-    </p>
-    <p class="footer small">North Pole Command · NPIA Secure Broadcast</p>
-  </div>
-
-  <div id="end" class="endscreen">TRANSMISSION ENDED</div>
-
-  <script src="snow.js"></script>
-  <script>
-    (function () {
-      const audio = document.getElementById('beep');
-      const content = document.getElementById('content');
-      const end = document.getElementById('end');
-      const snow = document.getElementById('snow');
-      const overlay = document.getElementById('startOverlay');
-
-      overlay.addEventListener('click', () => {
-        overlay.style.display = 'none';
-        try { audio.play(); } catch (e) { }
-
-        // Flicker start effect
-        content.classList.add('flicker');
-        // End sequence after 30 seconds
-        setTimeout(() => {
-          content.classList.add('flicker');
-          setTimeout(() => {
-            document.body.classList.add('blackout');
-            content.style.opacity = 0;
-            snow.style.display = 'none';
-            setTimeout(() => {
-              end.style.background = '#000';
-              end.style.color = '#fff';
-              end.style.opacity = 1;
-              end.classList.add('flicker');
-
-              // Auto-redirect to Mission Control after 10 seconds
-              setTimeout(() => {
-                window.location.href = 'operation_save_christmas.html?stage=0';
-              }, 10000); // 10,000 ms = 10 seconds
-
-            }, 1500);
-          }, 1200);
-        }, 30000);
-
-      });
-    })();
-  </script>
-</body>
-
-</html><!doctype html>
-<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
@@ -169,7 +39,7 @@
 <div id="startOverlay" class="flicker">TAP TO START TRANSMISSION</div>
 
 <canvas id="snow"></canvas>
-<!-- Replace src with your actual elf-voice MP3 if named differently -->
+<!-- Replace src if your file name is different -->
 <audio id="beep" src="speech_20251111195406392.mp3" preload="auto"></audio>
 
 <div class="container" id="content">
@@ -189,42 +59,53 @@
 
 <script src="snow.js"></script>
 <script>
-(function(){
-  const audio = document.getElementById('beep');
+(function() {
+  const audio   = document.getElementById('beep');
   const content = document.getElementById('content');
-  const end = document.getElementById('end');
-  const snow = document.getElementById('snow');
+  const end     = document.getElementById('end');
+  const snow    = document.getElementById('snow');
   const overlay = document.getElementById('startOverlay');
 
+  if (!overlay) return; // safety
+
   overlay.addEventListener('click', () => {
+    // hide overlay
     overlay.style.display = 'none';
-    try { audio.play(); } catch(e){}
 
-    // Flicker start effect
-    content.classList.add('flicker');
-    setTimeout(()=>content.classList.remove('flicker'),1500);
+    // try to play audio (may require user gesture – we have it)
+    try { audio && audio.play(); } catch(e){}
 
-    // End sequence after 30 seconds
-    setTimeout(()=>{
+    // small flicker on content at start
+    if (content) {
       content.classList.add('flicker');
-      setTimeout(()=>{
+      setTimeout(() => content.classList.remove('flicker'), 1500);
+    }
+
+    // End sequence after ~30s of "transmission"
+    setTimeout(() => {
+      if (content) content.classList.add('flicker');
+
+      setTimeout(() => {
         document.body.classList.add('blackout');
-        content.style.opacity = 0;
-        snow.style.display = 'none';
-        setTimeout(()=>{
-          end.style.background = '#000';
-          end.style.color = '#fff';
-          end.style.opacity = 1;
-          end.classList.add('flicker');
+        if (content) content.style.opacity = 0;
+        if (snow) snow.style.display = 'none';
+
+        setTimeout(() => {
+          if (end) {
+            end.style.background = '#000';
+            end.style.color = '#fff';
+            end.style.opacity = 1;
+            end.classList.add('flicker');
+          }
 
           // Auto-redirect to Mission Control after 10 seconds
           setTimeout(() => {
             window.location.href = 'operation_save_christmas.html?stage=0';
           }, 10000);
 
-        },1500);
-      },1200);
-    },30000);
+        }, 1500);
+      }, 1200);
+    }, 30000);
   });
 })();
 </script>
