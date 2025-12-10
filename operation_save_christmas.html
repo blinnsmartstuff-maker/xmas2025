@@ -91,17 +91,14 @@
   // ---- Override: stage=success ----
   if (stageRaw === 'success') {
     runSuccessOverride();
-    return;
-  }
-
-  // ---- Override: stage=failure ----
-  if (stageRaw === 'failure') {
+  } else if (stageRaw === 'failure') {
     runFailureOverride();
-    return;
+  } else {
+    runNormalStage(stageRaw);
   }
 
   // ---- Otherwise: normal numeric stage (0–4) ----
-  runNormalStage(stageRaw);
+  
 
   // ============================
   // Normal Stage Flow (0–4)
