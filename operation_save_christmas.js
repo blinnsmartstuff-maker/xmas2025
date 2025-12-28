@@ -5,7 +5,7 @@
   function pad2(n){ return String(n).padStart(2,'0'); }
 
   function getCSTNow(){
-    // Use America/Chicago so DST is handled correctly.
+    // DST-safe Central Time
     const now = new Date();
     return new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
   }
@@ -24,6 +24,73 @@
     const m = Math.floor((total % 3600) / 60);
     const s = total % 60;
     return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+  }
+
+  // ---------------------------------
+  // Objectives + Order Riddles
+  // ---------------------------------
+  const objectivesByStep = {
+    1: [
+      "Puzzle A: Apply the corrupted rules to classify behaviors",
+      "Puzzle B: Identify the correct ornament set (two conditions)",
+      "Puzzle C: Alphabetize Santa’s list and extract the index digit"
+    ],
+    2: [
+      "Puzzle A: Identify the rogue elf from the statement cards",
+      "Puzzle B: Spot the mislabeled gift tag and correct the unit",
+      "Puzzle C: Decode the ELF acrostic transmission"
+    ],
+    3: [
+      "Puzzle A: Align the overlay to reveal the X / coordinate",
+      "Puzzle B: Order the reindeer correctly and extract the digit",
+      "Puzzle C: Use the house as the map to locate the button"
+    ],
+    4: [
+      "Puzzle A: Identify the mission pattern to produce a digit",
+      "Puzzle B: Use the countdown clue to produce a digit",
+      "Puzzle C: Apply the Santa constant to produce a digit"
+    ]
+  };
+
+  const orderRiddleByStep = {
+    1: "The algorithm favors balance, not impulse. Begin where virtue is least, end where virtue is greatest.",
+    2: "Not all numbers are alike. First, those that play fair. Then, those that do not.",
+    3: "The journey does not begin at the start. Follow the path as it would be flown — from the farthest point back home.",
+    4: "The final code demands stability. Center first. Balance on either side."
+  };
+
+  function renderObjectivesAndRiddles(currentStage){
+    // currentStage is 0..4
+    document.querySelectorAll(".step").forEach(stepEl => {
+      const stepNum = parseInt(stepEl.dataset.step, 10);
+
+      const list = document.getElementById(`obj-${stepNum}`);
+      const riddleBox = document.getElementById(`riddle-${stepNum}`);
+
+      if (!list || !riddleBox) return;
+
+      const isDone = stepNum <= currentStage;
+      const isActive = (currentStage < 4) && (stepNum === (currentStage + 1)); // stage=0 means mission 1 is active
+
+      stepEl.classList.toggle("active", isActive);
+
+      // objectives
+      const items = objectivesByStep[stepNum] || [];
+      list.innerHTML = items.map((txt) => {
+        const bullet = isDone ? "✔" : "•";
+        const cls = isDone ? "done" : (isActive ? "active" : "pending");
+        return `<li class="${cls}"><span class="bullet">${bullet}</span><span>${txt}</span></li>`;
+      }).join("");
+
+      // riddle
+      const riddleText = orderRiddleByStep[stepNum] || "";
+      riddleBox.innerHTML = `
+        <div class="tag">Order Riddle</div>
+        <div class="riddleText">${riddleText}</div>
+      `;
+
+      // Fade riddle when not active (CSS handles opacity)
+    });
   }
 
   // ---------------------------------
@@ -64,9 +131,9 @@
   // Colors with Stage 1/3 swapped: 1=gold, 3=green
   const colors = {
     0: '#7a0b12',
-    1: '#b8860b',
+    1: '#b8860b', // stage 1 gold/yellow
     2: '#0057a4',
-    3: '#006b2d',
+    3: '#006b2d', // stage 3 green
     4: '#ffffff'
   };
   const textColors = {
@@ -80,12 +147,15 @@
   document.body.style.background = colors[clamped];
   document.body.style.color = textColors[clamped];
 
-  // Update tracker candy canes
+  // Update tracker candy canes (done/filled)
   document.querySelectorAll('.step').forEach(step => {
     const num = parseInt(step.dataset.step, 10);
     if (num <= clamped) step.classList.add('done');
     else step.classList.remove('done');
   });
+
+  // Objectives + riddles rendering
+  renderObjectivesAndRiddles(clamped);
 
   // Countdown loop (also triggers fail at midnight)
   function updateClock(){
@@ -104,7 +174,7 @@
   setInterval(updateClock, 1000);
   updateClock();
 
-  // Auto-success if stage=4 (give them a beat to see the last cane fill)
+  // Auto-success if stage=4 (give them a beat to see completion)
   if (clamped === 4) {
     setTimeout(() => showSuccessOverlay(false), 2500);
   }
@@ -122,19 +192,15 @@
     if (endStateShown) return;
     endStateShown = true;
 
-    // Freeze time remaining at moment of victory (or show label in override)
     const remaining = getTimeRemainingToMidnight();
     if (successTimeEl) {
       successTimeEl.textContent = isOverride ? "SUCCESS MODE" : formatHMS(remaining);
     }
 
-    // Make it feel like a true success page: hide HUD + tracker
     hideMainUI();
 
-    // Optional: keep countdownWrap visible as a subtle frame, but update text
     if (countdown) countdown.textContent = isOverride ? "SUCCESS MODE" : `${formatHMS(remaining)} remaining`;
 
-    // Set a celebratory background (gold-tinted) regardless of stage background
     document.body.style.background = "linear-gradient(135deg, #061a33, #b8860b)";
     document.body.style.color = "#ffffff";
 
