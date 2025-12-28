@@ -5,7 +5,6 @@
   function pad2(n){ return String(n).padStart(2,'0'); }
 
   function getCSTNow(){
-    // DST-safe Central Time
     const now = new Date();
     return new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
   }
@@ -63,33 +62,40 @@
     // currentStage is 0..4
     document.querySelectorAll(".step").forEach(stepEl => {
       const stepNum = parseInt(stepEl.dataset.step, 10);
-
       const list = document.getElementById(`obj-${stepNum}`);
       const riddleBox = document.getElementById(`riddle-${stepNum}`);
 
       if (!list || !riddleBox) return;
 
       const isDone = stepNum <= currentStage;
-      const isActive = (currentStage < 4) && (stepNum === (currentStage + 1)); // stage=0 means mission 1 is active
 
+      // stage=0 => mission 1 is active
+      // stage=1 => mission 2 is active
+      // ...
+      // stage=4 => none active (complete)
+      const isActive = (currentStage < 4) && (stepNum === (currentStage + 1));
+
+      // Card state classes
       stepEl.classList.toggle("active", isActive);
 
-      // objectives
+      // NEW: collapse (hide details) if not active
+      stepEl.classList.toggle("collapsed", !isActive);
+
+      // Build objectives content (even if hidden when collapsed; safe + simple)
       const items = objectivesByStep[stepNum] || [];
       list.innerHTML = items.map((txt) => {
         const bullet = isDone ? "✔" : "•";
+        // Only the active stage should look "active"
         const cls = isDone ? "done" : (isActive ? "active" : "pending");
         return `<li class="${cls}"><span class="bullet">${bullet}</span><span>${txt}</span></li>`;
       }).join("");
 
-      // riddle
+      // Build riddle content
       const riddleText = orderRiddleByStep[stepNum] || "";
       riddleBox.innerHTML = `
         <div class="tag">Order Riddle</div>
         <div class="riddleText">${riddleText}</div>
       `;
-
-      // Fade riddle when not active (CSS handles opacity)
     });
   }
 
@@ -130,11 +136,11 @@
 
   // Colors with Stage 1/3 swapped: 1=gold, 3=green
   const colors = {
-    0: '#7a0b12',
-    1: '#b8860b', // stage 1 gold/yellow
-    2: '#0057a4',
-    3: '#006b2d', // stage 3 green
-    4: '#ffffff'
+    0: '#7a0b12',  // red
+    1: '#b8860b',  // orange/gold
+    2: '#0057a4',  // blue
+    3: '#006b2d',  // green
+    4: '#ffffff'   // white
   };
   const textColors = {
     0: '#f2f2f2',
@@ -154,7 +160,7 @@
     else step.classList.remove('done');
   });
 
-  // Objectives + riddles rendering
+  // Objectives + riddles rendering + collapsing logic
   renderObjectivesAndRiddles(clamped);
 
   // Countdown loop (also triggers fail at midnight)
