@@ -1,231 +1,100 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
-<title>Operation Save Christmas – Mission Control</title>
-<link rel="stylesheet" href="operation.css">
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operation: Save Christmas</title>
+  <link rel="stylesheet" href="operation_save_christmas.css">
 </head>
-
 <body>
+  <!-- TOP BAR -->
+  <div id="topBar">
+    <div class="top-left">
+      <h1 id="header">Operation: Save Christmas</h1>
+      <p id="subtitle">North Pole Intelligence Agency · Live Mission Status</p>
+    </div>
 
-<!-- Countdown panel -->
-<div id="countdownWrap">
-  <div id="countdownLabel">North Pole Countdown</div>
-  <div id="countdown">--:--:--</div>
-</div>
-
-<h1 id="header">Operation: Save Christmas</h1>
-<p id="subtitle">North Pole Intelligence Agency · Live Mission Status</p>
-
-<div id="tracker">
-  <div class="step" data-step="1">
-    <img src="christmas_candy.png" class="icon cane">
-    <div class="text">
-      <div class="label">Algorithm Restored</div>
-      <div class="desc">Reboot the Naughty/Nice core and stabilize the system.</div>
+    <div id="countdownWrap">
+      <div id="countdownLabel">North Pole Countdown</div>
+      <div id="countdown">--:--:-- until midnight</div>
     </div>
   </div>
 
-  <div class="step" data-step="2">
-    <img src="christmas_candy.png" class="icon cane">
-    <div class="text">
-      <div class="label">Rogue Elf Apprehended</div>
-      <div class="desc">Identify and contain the saboteur hiding among the gifts.</div>
+  <!-- MAIN CONTENT -->
+  <div id="mainContent">
+    <div id="tracker" aria-label="Mission tracker">
+      <div class="step" data-step="1">
+        <img src="christmas_candy_PNG97287.png" class="icon cane" alt="Candy cane">
+        <div class="text">
+          <div class="label">Algorithm Restored</div>
+          <div class="desc">Reboot the Naughty/Nice core and stabilize the system.</div>
+        </div>
+      </div>
+
+      <div class="step" data-step="2">
+        <img src="christmas_candy_PNG97287.png" class="icon cane" alt="Candy cane">
+        <div class="text">
+          <div class="label">Rogue Elf Apprehended</div>
+          <div class="desc">Identify and contain the saboteur hiding among the gifts.</div>
+        </div>
+      </div>
+
+      <div class="step" data-step="3">
+        <img src="christmas_candy_PNG97287.png" class="icon cane" alt="Candy cane">
+        <div class="text">
+          <div class="label">Flight Path Restored</div>
+          <div class="desc">Reconstruct Santa’s global route before takeoff.</div>
+        </div>
+      </div>
+
+      <div class="step" data-step="4">
+        <img src="christmas_candy_PNG97287.png" class="icon cane" alt="Candy cane">
+        <div class="text">
+          <div class="label">Santa Cleared for Takeoff</div>
+          <div class="desc">Power the sleigh, lock in coordinates, and launch.</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="step" data-step="3">
-    <img src="christmas_candy.png" class="icon cane">
-    <div class="text">
-      <div class="label">Flight Path Restored</div>
-      <div class="desc">Reconstruct Santa’s global route before takeoff.</div>
+  <!-- SUCCESS / FAILURE OVERLAYS -->
+  <div id="successOverlay" class="overlay">
+    <div class="overlay-card success">
+      <div class="kicker">MISSION ACCOMPLISHED</div>
+      <div class="big">CHRISTMAS SAVED</div>
+
+      <div class="sub">
+        All systems restored. Santa is cleared for takeoff.<br>
+        <span class="fine">Excellent work, Agents.</span>
+      </div>
+
+      <div class="time-row">
+        <div class="time-label">TIME REMAINING</div>
+        <div id="successTime" class="time-value">--:--:--</div>
+      </div>
+
+      <div id="standDown" class="standdown">Stand down. Enjoy your victory.</div>
     </div>
   </div>
 
-  <div class="step" data-step="4">
-    <img src="christmas_candy.png" class="icon cane">
-    <div class="text">
-      <div class="label">Santa Cleared for Takeoff</div>
-      <div class="desc">Power the sleigh, lock in coordinates, and launch.</div>
+  <div id="failureOverlay" class="overlay">
+    <div class="overlay-card failure">
+      <div class="kicker">MISSION FAILED</div>
+      <div class="big">CHRISTMAS COMPROMISED</div>
+      <div class="sub">
+        Midnight has passed. Systems did not stabilize in time.<br>
+        <span class="fine">Better luck next year, Agents.</span>
+      </div>
+      <div class="time-row">
+        <div class="time-label">STATUS</div>
+        <div class="time-value">TIME EXPIRED</div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- SUCCESS OVERLAY -->
-<div id="successOverlay" class="finalscreen success">
-  <div class="final-inner">
-    <h2>MISSION ACCOMPLISHED</h2>
-    <p>All systems restored before midnight.<br>
-    Santa is cleared for takeoff.<br>
-    Christmas is saved.</p>
-  </div>
-</div>
-
-<!-- FAILURE OVERLAY -->
-<div id="failureOverlay" class="finalscreen failure">
-  <div class="final-inner">
-    <h2>MISSION FAILED</h2>
-    <p>The countdown reached zero before all systems were online.<br>
-    Santa’s launch has been scrubbed.</p>
-  </div>
-</div>
-
-<script>
-(function() {
-  // ============================
-  // Stage handling with overrides
-  // ============================
-  const params = new URLSearchParams(window.location.search);
-  const stageRaw = (params.get('stage') || '').toString().trim().toLowerCase();
-
-  const successOverlay = document.getElementById('successOverlay');
-  const failureOverlay = document.getElementById('failureOverlay');
-  let endStateShown = false;
-
-  // ---- Override: stage=success ----
-  if (stageRaw === 'success') {
-    runSuccessOverride();
-  } else if (stageRaw === 'failure') {
-    runFailureOverride();
-  } else {
-    runNormalStage(stageRaw);
-  }
-
-  // ---- Otherwise: normal numeric stage (0–4) ----
-  
-
-  // ============================
-  // Normal Stage Flow (0–4)
-  // ============================
-  function runNormalStage(stageRaw) {
-    const stageNum = parseInt(stageRaw || '0', 10);
-
-    // Swapped colors: Stage 1 = gold, Stage 3 = green
-    const colors = {
-      0: '#7a0b12', // red alert
-      1: '#b8860b', // gold (Stage 1)
-      2: '#0057a4', // blue
-      3: '#006b2d', // green (Stage 3)
-      4: '#ffffff'  // white final
-    };
-
-    const textColors = {
-      0: '#f2f2f2',
-      1: '#f2f2f2',
-      2: '#f2f2f2',
-      3: '#f2f2f2',
-      4: '#111111'
-    };
-
-    const clamped = Math.max(0, Math.min(4, isNaN(stageNum) ? 0 : stageNum));
-
-    document.body.style.background = colors[clamped];
-    document.body.style.color = textColors[clamped];
-
-    // Update tracker candy canes
-    document.querySelectorAll('.step').forEach(step => {
-      const num = parseInt(step.dataset.step, 10);
-      if (num <= clamped) step.classList.add('done');
-      else step.classList.remove('done');
-    });
-
-    // Auto-success if stage=4
-    if (clamped === 4) {
-      setTimeout(() => showSuccess(), 4000);
-    }
-
-    // ============================
-    // Countdown to Midnight CST
-    // ============================
-    function updateClock(){
-      const now = new Date();
-      const cst = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
-      const midnight = new Date(cst);
-      midnight.setHours(24,0,0,0);
-
-      const diff = midnight - cst;
-      const el = document.getElementById("countdown");
-
-      if (diff <= 0) {
-        el.textContent = "00:00:00 until midnight";
-
-        if (clamped < 4) showFailure();
-        else showSuccess();
-
-        return;
-      }
-
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-
-      el.textContent =
-        `${String(h).padStart(2,'0')}:` +
-        `${String(m).padStart(2,'0')}:` +
-        `${String(s).padStart(2,'0')} until midnight`;
-    }
-
-    setInterval(updateClock, 1000);
-    updateClock();
-  }
-
-  // ============================
-  // Override flows
-  // ============================
-  function runSuccessOverride() {
-    document.body.style.background = "#0c6b2a";
-    document.body.style.color = "#ffffff";
-    disableTracker();
-    setFakeCountdown("SUCCESS MODE");
-    setTimeout(() => successOverlay.classList.add('visible'), 300);
-  }
-
-  function runFailureOverride() {
-    document.body.style.background = "#330000";
-    document.body.style.color = "#ffdddd";
-    disableTracker();
-    setFakeCountdown("FAILURE MODE");
-    setTimeout(() => failureOverlay.classList.add('visible'), 300);
-  }
-
-  // ============================
-  // Shared helpers
-  // ============================
-  function showSuccess() {
-    if (endStateShown) return;
-    endStateShown = true;
-    successOverlay.classList.add("visible");
-  }
-
-  function showFailure() {
-    if (endStateShown) return;
-    endStateShown = true;
-    failureOverlay.classList.add("visible");
-  }
-
-  function disableTracker() {
-    const tracker = document.getElementById("tracker");
-    const header = document.getElementById("header");
-    const subtitle = document.getElementById("subtitle");
-    if (tracker) tracker.classList.add('hidden');
-    if (header) header.classList.add('hidden');
-    if (subtitle) subtitle.classList.add('hidden');
-  }
-
-  function setFakeCountdown(text) {
-    const el = document.getElementById("countdown");
-    if (el) el.textContent = text;
-  }
-
-})(); // <-- THIS closes the IIFE
-</script>
-
-
+  <script src="operation_save_christmas.js"></script>
 </body>
 </html>
