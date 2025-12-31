@@ -25,6 +25,12 @@
     return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
   }
 
+  function formatMMSS(totalSeconds){
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${pad2(m)}:${pad2(s)}`;
+  }
+
   // ---------------------------------
   // Objectives + Order Riddles
   // ---------------------------------
@@ -78,14 +84,13 @@
       // Card state classes
       stepEl.classList.toggle("active", isActive);
 
-      // NEW: collapse (hide details) if not active
+      // collapse (hide details) if not active
       stepEl.classList.toggle("collapsed", !isActive);
 
       // Build objectives content (even if hidden when collapsed; safe + simple)
       const items = objectivesByStep[stepNum] || [];
       list.innerHTML = items.map((txt) => {
         const bullet = isDone ? "✔" : "•";
-        // Only the active stage should look "active"
         const cls = isDone ? "done" : (isActive ? "active" : "pending");
         return `<li class="${cls}"><span class="bullet">${bullet}</span><span>${txt}</span></li>`;
       }).join("");
@@ -105,6 +110,12 @@
   const params = new URLSearchParams(window.location.search);
   const stageRaw = (params.get('stage') || '').toString().trim().toLowerCase();
 
+  const overtimeOverlay = document.getElementById('overtimeOverlay');
+  const overtimeTimerEl = document.getElementById('overtimeTimer');
+  const overtimeForm    = document.getElementById('overtimeForm');
+  const overtimeInput   = document.getElementById('overtimeInput');
+  const overtimeMsg     = document.getElementById('overtimeMsg');
+
   const successOverlay = document.getElementById('successOverlay');
   const failureOverlay = document.getElementById('failureOverlay');
   const successTimeEl  = document.getElementById('successTime');
@@ -113,11 +124,14 @@
   const header    = document.getElementById('header');
   const subtitle  = document.getElementById('subtitle');
   const countdown = document.getElementById('countdown');
+  const countdownLabel = document.getElementById('countdownLabel');
+  const countdownWrap  = document.getElementById('countdownWrap');
 
   let endStateShown = false;
+  let clockInterval = null;
 
   // ---------------------------------
-  // Stage overrides
+  // Stage overrides (manual testing)
   // ---------------------------------
   if (stageRaw === 'success') {
     showSuccessOverlay(true);
@@ -125,6 +139,12 @@
   }
   if (stageRaw === 'failure') {
     showFailureOverlay(true);
+    return;
+  }
+
+  // Manual testing for overtime mode
+  if (stageRaw === 'overtime') {
+    enterOvertimeMode(true);
     return;
   }
 
@@ -163,26 +183,48 @@
   // Objectives + riddles rendering + collapsing logic
   renderObjectivesAndRiddles(clamped);
 
-  // Countdown loop (also triggers fail at midnight)
+  // If midnight already passed, fail immediately unless manually overridden
+  if (getTimeRemainingToMidnight() <= 0 && clamped < 4) {
+    showFailureOverlay(false);
+    return;
+  }
+
+  // Normal midnight countdown loop (stops when overtime starts)
   function updateClock(){
     const remaining = getTimeRemainingToMidnight();
+
     if (countdown) {
       if (remaining <= 0) countdown.textContent = "00:00:00 until midnight";
       else countdown.textContent = `${formatHMS(remaining)} until midnight`;
     }
 
-    // If time is out, decide outcome
-    if (remaining <= 0) {
-      if (clamped < 4) showFailureOverlay(false);
-      else showSuccessOverlay(false);
+    // If time is out during missions 0-3, fail
+    if (remaining <= 0 && clamped < 4) {
+      showFailureOverlay(false);
     }
   }
-  setInterval(updateClock, 1000);
+
+  clockInterval = setInterval(updateClock, 1000);
   updateClock();
 
-  // Auto-success if stage=4 (give them a beat to see completion)
+  // ---------------------------------
+  // Stage 4 trigger → OVERTIME (requested)
+  // ---------------------------------
   if (clamped === 4) {
-    setTimeout(() => showSuccessOverlay(false), 2500);
+    // Stop the midnight clock. Overtime determines outcome now.
+    if (clockInterval) {
+      clearInterval(clockInterval);
+      clockInterval = null;
+    }
+
+    // Let the Stage 4 "completion" sit for a beat, then glitch into overtime
+    setTimeout(() => {
+      document.body.classList.add('glitch');
+      setTimeout(() => {
+        document.body.classList.remove('glitch');
+        enterOvertimeMode(false);
+      }, 2200);
+    }, 800);
   }
 
   // ---------------------------------
@@ -192,6 +234,7 @@
     if (tracker) tracker.classList.add('hidden');
     if (header) header.classList.add('hidden');
     if (subtitle) subtitle.classList.add('hidden');
+    if (countdownWrap) countdownWrap.classList.add('hidden');
   }
 
   function showSuccessOverlay(isOverride){
@@ -225,4 +268,94 @@
 
     failureOverlay?.classList.add('visible');
   }
+
+  // ---------------------------------
+  // OVERTIME MODE
+  // ---------------------------------
+  const OVERTIME_SECONDS = 10 * 60;
+  const OVERTIME_PASSWORD = "midnight";
+  let overtimeRemaining = OVERTIME_SECONDS;
+  let overtimeInterval = null;
+
+  function enterOvertimeMode(isOverride){
+    if (endStateShown) return; // don't allow overtime if already succeeded/failed
+    if (!overtimeOverlay || !overtimeTimerEl || !overtimeForm || !overtimeInput || !overtimeMsg) {
+      // If overtime UI is missing, fall back to success (safe)
+      showSuccessOverlay(true);
+      return;
+    }
+
+    // Hide main UI and show overtime overlay
+    hideMainUI();
+
+    overtimeOverlay.classList.add('visible');
+    overtimeOverlay.classList.remove('bad', 'ok', 'urgent');
+
+    // Update the top bar label if still present (in case you later unhide it)
+    if (countdownLabel) countdownLabel.textContent = "Final Authorization Window";
+    if (countdown) countdown.textContent = "10:00 remaining";
+
+    // Initialize timer
+    overtimeRemaining = OVERTIME_SECONDS;
+    overtimeTimerEl.textContent = formatMMSS(overtimeRemaining);
+    overtimeMsg.textContent = "";
+
+    // Focus for keyboard / FireTV remote
+    setTimeout(() => overtimeInput.focus(), 200);
+
+    overtimeInterval = setInterval(() => {
+      overtimeRemaining -= 1;
+
+      if (overtimeRemaining <= 0) {
+        overtimeTimerEl.textContent = "00:00";
+        clearInterval(overtimeInterval);
+        overtimeInterval = null;
+        showFailureOverlay(true);
+        return;
+      }
+
+      overtimeTimerEl.textContent = formatMMSS(overtimeRemaining);
+
+      if (overtimeRemaining === 60) {
+        overtimeOverlay.classList.add('urgent');
+      }
+    }, 1000);
+
+    // Submit handler (attach once)
+    if (!overtimeForm.dataset.bound) {
+      overtimeForm.dataset.bound = "1";
+      overtimeForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const val = (overtimeInput.value || '').trim().toLowerCase();
+
+        if (!val) return flashOvertimeBad("Enter a password.");
+
+        if (val === OVERTIME_PASSWORD) {
+          flashOvertimeOk("Authorization accepted.");
+          if (overtimeInterval) {
+            clearInterval(overtimeInterval);
+            overtimeInterval = null;
+          }
+          setTimeout(() => showSuccessOverlay(true), 650);
+        } else {
+          flashOvertimeBad("Access denied.");
+          overtimeInput.select();
+        }
+      });
+    }
+  }
+
+  function flashOvertimeBad(msg){
+    overtimeMsg.textContent = msg;
+    overtimeOverlay.classList.remove('ok');
+    overtimeOverlay.classList.add('bad');
+    setTimeout(() => overtimeOverlay.classList.remove('bad'), 450);
+  }
+
+  function flashOvertimeOk(msg){
+    overtimeMsg.textContent = msg;
+    overtimeOverlay.classList.remove('bad');
+    overtimeOverlay.classList.add('ok');
+  }
+
 })();

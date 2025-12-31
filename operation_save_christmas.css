@@ -257,7 +257,7 @@ html,body{
 }
 
 /* =========================
-   OVERLAYS (SUCCESS / FAILURE) - FESTIVE
+   OVERLAYS (SUCCESS / FAILURE / OVERTIME) - FESTIVE
    ========================= */
 .overlay{
   position:fixed;
@@ -351,6 +351,13 @@ html,body{
     linear-gradient(135deg, rgba(60,0,0,0.92), rgba(0,0,0,0.70));
 }
 
+/* overtime theme */
+.overlay-card.overtime{
+  background:
+    radial-gradient(900px 600px at 50% 15%, rgba(255,255,255,0.16), rgba(255,255,255,0.05)),
+    linear-gradient(135deg, rgba(8,8,14,0.92), rgba(10,30,60,0.55));
+}
+
 .kicker{
   margin-top:10px; /* below candy strip */
   font-weight:900;
@@ -430,6 +437,120 @@ html,body{
   text-shadow:
     0 0 16px rgba(255,120,120,0.18),
     0 18px 40px rgba(0,0,0,0.55);
+}
+
+/* =========================
+   OVERTIME FORM
+   ========================= */
+.overtimeForm{
+  width: min(560px, 92%);
+  margin: 1.1em auto 0;
+  text-align:left;
+}
+
+.overtimeLabel{
+  display:block;
+  margin: 0 0 0.45em;
+  font-weight:900;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  font-size:clamp(12px,1.3vw,14px);
+  opacity:0.9;
+}
+
+.overtimeRow{
+  display:flex;
+  gap:0.75em;
+  align-items:stretch;
+}
+
+.overtimeInput{
+  flex:1;
+  border-radius:16px;
+  border:2px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.35);
+  color:#fff;
+  padding: 0.9em 1.0em;
+  font-size: clamp(14px, 2.0vw, 18px);
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  outline:none;
+}
+
+.overtimeInput:focus{
+  border-color: rgba(255,255,255,0.40);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.10);
+}
+
+.overtimeBtn{
+  border-radius:16px;
+  border:2px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.10);
+  color:#fff;
+  padding: 0.9em 1.1em;
+  font-weight:1000;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+
+.overtimeBtn:active{ transform: translateY(1px); }
+
+.overtimeMsg{
+  margin-top:0.7em;
+  min-height:1.25em;
+  text-align:center;
+  font-weight:900;
+  letter-spacing:0.10em;
+  opacity:0.95;
+}
+
+.overtimeHint{
+  margin-top: 0.9em;
+  opacity:0.70;
+  font-size: clamp(12px, 1.4vw, 14px);
+  letter-spacing:0.06em;
+  text-align:center;
+}
+
+/* Overtime feedback / urgency */
+.overlay.bad .overlay-card.overtime{
+  border-color: rgba(255,80,80,0.55);
+}
+
+.overlay.ok .overlay-card.overtime{
+  border-color: rgba(80,255,160,0.45);
+}
+
+.overlay.urgent .time-row{
+  border-color: rgba(255,120,120,0.45);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.55),
+    0 0 0 4px rgba(255,120,120,0.08);
+}
+
+.overlay.urgent .time-value{
+  animation: pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes pulse{
+  0%,100%{ transform: scale(1); }
+  50%{ transform: scale(1.02); }
+}
+
+/* =========================
+   GLITCH (stage 4 -> overtime)
+   ========================= */
+body.glitch{
+  animation: glitchFlash 0.18s linear 6;
+}
+@keyframes glitchFlash{
+  0%{ filter:none; transform: translate(0,0); }
+  20%{ filter:contrast(1.2) brightness(1.1); transform: translate(1px,0); }
+  40%{ filter:hue-rotate(10deg); transform: translate(-1px,1px); }
+  60%{ filter:contrast(0.9) brightness(0.9); transform: translate(0,-1px); }
+  80%{ filter:none; transform: translate(1px,1px); }
+  100%{ filter:none; transform: translate(0,0); }
 }
 
 /* =========================

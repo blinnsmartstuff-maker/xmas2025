@@ -74,6 +74,35 @@
     </div>
   </div>
 
+  <!-- OVERTIME OVERLAY -->
+  <div id="overtimeOverlay" class="overlay">
+    <div class="overlay-card overtime">
+      <div class="kicker">UNAUTHORIZED INTERFERENCE DETECTED</div>
+      <div class="big">FINAL AUTHORIZATION REQUIRED</div>
+
+      <div class="sub">
+        A recovered transmission requires a single-word password.<br>
+        <span class="fine">Decrypt the message and enter the password before the window closes.</span>
+      </div>
+
+      <div class="time-row">
+        <div class="time-label">OVERTIME WINDOW</div>
+        <div id="overtimeTimer" class="time-value">10:00</div>
+      </div>
+
+      <form id="overtimeForm" class="overtimeForm" autocomplete="off">
+        <label class="overtimeLabel" for="overtimeInput">PASSWORD</label>
+        <div class="overtimeRow">
+          <input id="overtimeInput" class="overtimeInput" type="text" spellcheck="false" placeholder="ENTER PASSWORD">
+          <button class="overtimeBtn" type="submit">SUBMIT</button>
+        </div>
+        <div id="overtimeMsg" class="overtimeMsg" aria-live="polite"></div>
+      </form>
+
+      <div class="overtimeHint">Tip: case doesn’t matter.</div>
+    </div>
+  </div>
+
   <!-- SUCCESS / FAILURE OVERLAYS -->
   <div id="successOverlay" class="overlay">
     <div class="overlay-card success">
