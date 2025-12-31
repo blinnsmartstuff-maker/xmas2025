@@ -25,43 +25,22 @@
     return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
   }
 
-  function formatMMSS(totalSeconds){
-    const m = Math.floor(totalSeconds / 60);
-    const s = totalSeconds % 60;
-    return `${pad2(m)}:${pad2(s)}`;
-  }
-
   // ---------------------------------
-  // Mission content (shorter objectives)
+  // Mission metadata
   // ---------------------------------
   const missionMeta = {
-    1: { title: "Algorithm Restored", desc: "Stabilize the Naughty/Nice core." },
-    2: { title: "Rogue Elf Apprehended", desc: "Identify and contain the saboteur." },
-    3: { title: "Flight Path Restored", desc: "Rebuild Santa’s route to launch." },
+    1: { title: "Algorithm Restored",      desc: "Stabilize the Naughty/Nice core." },
+    2: { title: "Rogue Elf Apprehended",   desc: "Identify and contain the saboteur." },
+    3: { title: "Flight Path Restored",    desc: "Rebuild Santa’s route to launch." },
     4: { title: "Santa Cleared for Takeoff", desc: "Final checks and lockbox access." }
   };
 
+  // Shorter objective text (TV-friendly)
   const objectivesByStep = {
-    1: [
-      "Elf Party Log (score the elf actions)",
-      "Tree Deduction (spot the one false rule)",
-      "Missing Ingredient (solve the formula)"
-    ],
-    2: [
-      "Map Routes (find the only valid path)",
-      "Rules Audit (confirm all constraints)",
-      "Route ID (extract the digit)"
-    ],
-    3: [
-      "LEGO Rows (order the strips)",
-      "Flip & Align (resolve the digit)",
-      "Color Rules (verify the build)"
-    ],
-    4: [
-      "Sound Notes (listen + classify)",
-      "Rule Reveal (decode to digits)",
-      "Lockbox Entry (initiate override)"
-    ]
+    1: ["Puzzle A", "Puzzle B", "Puzzle C"],
+    2: ["Puzzle A", "Puzzle B", "Puzzle C"],
+    3: ["Puzzle A", "Puzzle B", "Puzzle C"],
+    4: ["Puzzle A", "Puzzle B", "Puzzle C"]
   };
 
   const orderRiddleByStep = {
@@ -77,12 +56,6 @@
   const params = new URLSearchParams(window.location.search);
   const stageRaw = (params.get('stage') || '').toString().trim().toLowerCase();
 
-  const overtimeOverlay = document.getElementById('overtimeOverlay');
-  const overtimeTimerEl = document.getElementById('overtimeTimer');
-  const overtimeForm    = document.getElementById('overtimeForm');
-  const overtimeInput   = document.getElementById('overtimeInput');
-  const overtimeMsg     = document.getElementById('overtimeMsg');
-
   const successOverlay = document.getElementById('successOverlay');
   const failureOverlay = document.getElementById('failureOverlay');
   const successTimeEl  = document.getElementById('successTime');
@@ -90,25 +63,26 @@
   const header    = document.getElementById('header');
   const subtitle  = document.getElementById('subtitle');
   const countdown = document.getElementById('countdown');
-  const countdownLabel = document.getElementById('countdownLabel');
-  const countdownWrap  = document.getElementById('countdownWrap');
 
-  const missionItems = Array.from(document.querySelectorAll('.missionItem'));
-
-  const activeTitle = document.getElementById('activeTitle');
-  const activeDesc  = document.getElementById('activeDesc');
-  const activeObjectives = document.getElementById('activeObjectives');
-  const activeRiddle = document.getElementById('activeRiddle');
+  const missionList = document.getElementById('missionList');
+  const detailTitle = document.getElementById('detailTitle');
+  const detailDesc  = document.getElementById('detailDesc');
+  const detailObjectives = document.getElementById('detailObjectives');
+  const detailRiddle = document.getElementById('detailRiddle');
 
   let endStateShown = false;
-  let clockInterval = null;
 
   // ---------------------------------
-  // Stage overrides (manual testing)
+  // Stage overrides
   // ---------------------------------
-  if (stageRaw === 'success') { showSuccessOverlay(true); return; }
-  if (stageRaw === 'failure') { showFailureOverlay(true); return; }
-  if (stageRaw === 'overtime') { enterOvertimeMode(true); return; }
+  if (stageRaw === 'success') {
+    showSuccessOverlay(true);
+    return;
+  }
+  if (stageRaw === 'failure') {
+    showFailureOverlay(true);
+    return;
+  }
 
   // ---------------------------------
   // Normal stage handling
@@ -135,95 +109,102 @@
   document.body.style.background = colors[clamped];
   document.body.style.color = textColors[clamped];
 
-  // If midnight already passed, fail immediately (unless already complete)
-  if (getTimeRemainingToMidnight() <= 0 && clamped < 4) {
-    showFailureOverlay(false);
-    return;
-  }
-
-  // Render left list status + right panel content
+  // Render the split UI
   renderSplitUI(clamped);
 
-  // Countdown loop (stops when overtime starts)
+  // Countdown loop (also triggers fail at midnight)
   function updateClock(){
     const remaining = getTimeRemainingToMidnight();
-
     if (countdown) {
       if (remaining <= 0) countdown.textContent = "00:00:00 until midnight";
       else countdown.textContent = `${formatHMS(remaining)} until midnight`;
     }
 
-    if (remaining <= 0 && clamped < 4) {
-      showFailureOverlay(false);
+    // If time is out, decide outcome
+    if (remaining <= 0) {
+      if (clamped < 4) showFailureOverlay(false);
+      else showSuccessOverlay(false);
     }
   }
-
-  clockInterval = setInterval(updateClock, 1000);
+  setInterval(updateClock, 1000);
   updateClock();
 
-  // Stage 4 trigger → glitch → overtime
-  if (clamped === 4) {
-    if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
-
-    setTimeout(() => {
-      document.body.classList.add('glitch');
-      setTimeout(() => {
-        document.body.classList.remove('glitch');
-        enterOvertimeMode(false);
-      }, 2200);
-    }, 800);
-  }
+  // If stage=4, do NOT auto-show success immediately anymore (you later wanted a twist).
+  // Keeping your previous behavior would override your new idea.
+  // If you want it back, uncomment below:
+  // if (clamped === 4) setTimeout(() => showSuccessOverlay(false), 2500);
 
   // ---------------------------------
-  // Split UI rendering
+  // Split UI renderer
   // ---------------------------------
   function renderSplitUI(currentStage){
-    // currentStage = 0..4
-    // Active mission is step = currentStage+1 (while <4). When stage=4, none active.
-    const activeStep = (currentStage < 4) ? (currentStage + 1) : null;
+    // currentStage: 0..4
+    // Active mission = currentStage+1 (unless complete)
+    const activeMission = (currentStage < 4) ? (currentStage + 1) : 4;
 
-    missionItems.forEach(el => {
-      const step = parseInt(el.dataset.step, 10);
-      const done = step <= currentStage;
-      const active = (activeStep !== null && step === activeStep);
+    // Left panel missions
+    if (missionList) {
+      missionList.innerHTML = [1,2,3,4].map(m => {
+        const meta = missionMeta[m];
+        const done = m <= currentStage;
+        const active = (currentStage < 4) && (m === activeMission);
 
-      el.classList.toggle('done', done);
-      el.classList.toggle('active', active);
-    });
+        const stateCls = done ? "done" : (active ? "active" : "pending");
+        const badge = done ? "✔" : String(m);
 
-    if (!activeStep) {
-      // completed state (stage=4) – the overtime overlay will take over shortly
-      if (activeTitle) activeTitle.textContent = "All Missions Complete";
-      if (activeDesc) activeDesc.textContent = "Stand by...";
-      if (activeObjectives) activeObjectives.innerHTML = "";
-      if (activeRiddle) activeRiddle.textContent = "—";
-      return;
-    }
-
-    const meta = missionMeta[activeStep] || { title: "—", desc: "—" };
-    if (activeTitle) activeTitle.textContent = meta.title;
-    if (activeDesc) activeDesc.textContent = meta.desc;
-
-    const items = objectivesByStep[activeStep] || [];
-    if (activeObjectives) {
-      activeObjectives.innerHTML = items.map(txt => {
-        return `<li class="active"><span class="bullet">•</span><span>${txt}</span></li>`;
+        return `
+          <div class="missionItem ${stateCls}" data-mission="${m}">
+            <div class="missionBadge">${badge}</div>
+            <div class="missionText">
+              <div class="missionTitle">${meta.title}</div>
+              <div class="missionMini">${meta.desc}</div>
+            </div>
+          </div>
+        `;
       }).join("");
     }
 
-    const r = orderRiddleByStep[activeStep] || "—";
-    if (activeRiddle) activeRiddle.textContent = r;
+    // Right panel details (active mission only)
+    const meta = missionMeta[activeMission];
+    if (detailTitle) detailTitle.textContent = meta?.title || "--";
+    if (detailDesc)  detailDesc.textContent  = meta?.desc || "--";
+
+    // Objectives list
+    const items = objectivesByStep[activeMission] || [];
+    const isComplete = (currentStage >= 4);
+    if (detailObjectives) {
+      detailObjectives.innerHTML = items.map((txt, i) => {
+        // if mission is done, show checks; if active, bullets; if future, dim bullets
+        const missionDone = activeMission <= currentStage;
+        const bullet = missionDone ? "✔" : "•";
+        const cls = missionDone ? "done" : "active";
+        return `<li class="${cls}"><span class="bullet">${bullet}</span><span>${txt}</span></li>`;
+      }).join("");
+      if (isComplete) {
+        // If complete, keep it clean
+        detailObjectives.innerHTML = `<li class="done"><span class="bullet">✔</span><span>All missions complete</span></li>`;
+      }
+    }
+
+    // Riddle
+    const riddleText = orderRiddleByStep[activeMission] || "--";
+    if (detailRiddle) {
+      const riddleTextEl = detailRiddle.querySelector('.riddleText');
+      if (riddleTextEl) riddleTextEl.textContent = riddleText;
+      if (isComplete) {
+        if (riddleTextEl) riddleTextEl.textContent = "Stand by for next instructions.";
+      }
+    }
   }
 
   // ---------------------------------
   // Overlay handlers
   // ---------------------------------
   function hideMainUI(){
-    const splitShell = document.getElementById('splitShell');
-    if (splitShell) splitShell.classList.add('hidden');
-    if (header) header.classList.add('hidden');
-    if (subtitle) subtitle.classList.add('hidden');
-    if (countdownWrap) countdownWrap.classList.add('hidden');
+    // Split layout lives under #mainContent; hide it
+    document.getElementById('mainContent')?.classList.add('hidden');
+    header?.classList.add('hidden');
+    subtitle?.classList.add('hidden');
   }
 
   function showSuccessOverlay(isOverride){
@@ -257,88 +238,4 @@
 
     failureOverlay?.classList.add('visible');
   }
-
-  // ---------------------------------
-  // OVERTIME MODE
-  // ---------------------------------
-  const OVERTIME_SECONDS = 10 * 60;
-  const OVERTIME_PASSWORD = "midnight";
-  let overtimeRemaining = OVERTIME_SECONDS;
-  let overtimeInterval = null;
-
-  function enterOvertimeMode(isOverride){
-    if (endStateShown) return;
-    if (!overtimeOverlay || !overtimeTimerEl || !overtimeForm || !overtimeInput || !overtimeMsg) {
-      showSuccessOverlay(true);
-      return;
-    }
-
-    hideMainUI();
-
-    overtimeOverlay.classList.add('visible');
-    overtimeOverlay.classList.remove('bad', 'ok', 'urgent');
-
-    if (countdownLabel) countdownLabel.textContent = "Final Authorization Window";
-    if (countdown) countdown.textContent = "10:00 remaining";
-
-    overtimeRemaining = OVERTIME_SECONDS;
-    overtimeTimerEl.textContent = formatMMSS(overtimeRemaining);
-    overtimeMsg.textContent = "";
-
-    setTimeout(() => overtimeInput.focus(), 200);
-
-    overtimeInterval = setInterval(() => {
-      overtimeRemaining -= 1;
-
-      if (overtimeRemaining <= 0) {
-        overtimeTimerEl.textContent = "00:00";
-        clearInterval(overtimeInterval);
-        overtimeInterval = null;
-        showFailureOverlay(true);
-        return;
-      }
-
-      overtimeTimerEl.textContent = formatMMSS(overtimeRemaining);
-
-      if (overtimeRemaining === 60) {
-        overtimeOverlay.classList.add('urgent');
-      }
-    }, 1000);
-
-    if (!overtimeForm.dataset.bound) {
-      overtimeForm.dataset.bound = "1";
-      overtimeForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const val = (overtimeInput.value || '').trim().toLowerCase();
-
-        if (!val) return flashOvertimeBad("Enter a password.");
-
-        if (val === OVERTIME_PASSWORD) {
-          flashOvertimeOk("Authorization accepted.");
-          if (overtimeInterval) {
-            clearInterval(overtimeInterval);
-            overtimeInterval = null;
-          }
-          setTimeout(() => showSuccessOverlay(true), 650);
-        } else {
-          flashOvertimeBad("Access denied.");
-          overtimeInput.select();
-        }
-      });
-    }
-  }
-
-  function flashOvertimeBad(msg){
-    overtimeMsg.textContent = msg;
-    overtimeOverlay.classList.remove('ok');
-    overtimeOverlay.classList.add('bad');
-    setTimeout(() => overtimeOverlay.classList.remove('bad'), 450);
-  }
-
-  function flashOvertimeOk(msg){
-    overtimeMsg.textContent = msg;
-    overtimeOverlay.classList.remove('bad');
-    overtimeOverlay.classList.add('ok');
-  }
-
 })();

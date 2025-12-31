@@ -1,5 +1,5 @@
 :root{
-  --bg:#7a0b12;
+  --bg:#7a0b12;                 /* default stage 0 red */
   --fg:#f2f2f2;
   --panel:rgba(0,0,0,0.35);
   --panel2:rgba(0,0,0,0.55);
@@ -24,7 +24,7 @@ html,body{
    ========================= */
 #topBar{
   width:100%;
-  padding:1.1em 4vw;
+  padding:1.2em 4vw;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -80,188 +80,169 @@ html,body{
 }
 
 /* =========================
-   MAIN CONTENT (SPLIT)
+   MAIN CONTENT
    ========================= */
 #mainContent{
   height: calc(100vh - 92px);
-  padding: 2.5vh 3.5vw 3vh;
+  padding: 2.2vh 3vw 3vh;
 }
 
 #splitShell{
-  height:100%;
+  height: 100%;
   display:grid;
   grid-template-columns: 38% 62%;
   gap: 1.2em;
 }
 
-/* LEFT: mission list */
+/* =========================
+   LEFT PANEL (MISSIONS)
+   ========================= */
 #missionList{
   height:100%;
-  background: rgba(0,0,0,0.38);
+  border-radius:22px;
+  background: rgba(0,0,0,0.62);
   border:1px solid rgba(255,255,255,0.16);
-  border-radius:20px;
-  box-shadow:0 14px 30px rgba(0,0,0,0.25);
+  box-shadow:0 10px 22px rgba(0,0,0,0.25);
   backdrop-filter: blur(2px);
-  padding: 1.1em;
-}
+  padding: 1.2em;
 
-.missionListInner{
-  height:100%;
+  /* Vertical centering of the mission items */
   display:flex;
   flex-direction:column;
-  justify-content:center; /* vertical center justify mission names */
-  gap:0.9em;
+  justify-content:center;
+  gap: 1.05em;
 }
 
 .missionItem{
   display:flex;
   align-items:center;
-  gap:1.0em;
+  gap: 0.9em;
   padding: 0.95em 1.0em;
-  border-radius:18px;
-  background: rgba(0,0,0,0.55);
-  border:1px solid rgba(255,255,255,0.14);
-  opacity:0.88;
-  transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease, background 0.35s ease;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.28);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.18);
+  transition: transform 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease, border-color 0.4s ease;
+  opacity: 0.72;
 }
 
-.missionItem .missionLabel{
-  font-weight:1000;
-  text-transform:uppercase;
-  letter-spacing:0.12em;
-  font-size:clamp(14px,1.6vw,18px);
+.missionBadge{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display:grid;
+  place-items:center;
+  font-weight: 1000;
+  font-size: 18px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.18);
 }
 
-.missionItem .missionDesc{
-  margin-top:0.25em;
-  opacity:0.85;
-  font-size:clamp(12px,1.4vw,15px);
-  line-height:1.25;
+.missionTitle{
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: clamp(14px, 1.25vw, 18px);
 }
 
-.missionText{ width:100%; }
-
-.icon.cane{
-  width:clamp(44px, 5.2vw, 64px);
-  height:auto;
-  opacity:0.40;
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.35));
-  transition: opacity 0.35s ease, transform 0.35s ease, filter 0.35s ease;
+.missionMini{
+  margin-top: 0.25em;
+  opacity: 0.88;
+  font-size: clamp(12px, 1.1vw, 14px);
+  line-height: 1.25;
 }
 
-/* done missions */
-.missionItem.done{
-  opacity:1;
-  border-color: rgba(255,255,255,0.20);
-}
-.missionItem.done .icon.cane{
-  opacity:1;
-  transform: translateY(-1px) scale(1.02);
-  filter:
-    drop-shadow(0 0 14px rgba(255,255,255,0.28))
-    drop-shadow(0 10px 18px rgba(0,0,0,0.35));
-}
-
-/* active mission (candy cane border) */
+.missionItem.pending{ opacity: 0.55; }
 .missionItem.active{
-  opacity:1;
+  opacity: 1;
   transform: translateY(-1px);
-  box-shadow:0 18px 36px rgba(0,0,0,0.45);
-
   border: 10px solid transparent;
   border-image: repeating-linear-gradient(
     45deg,
     #d10010 0 10px,
     #ffffff 10px 20px
   ) 10 round;
-
   outline: 2px solid rgba(255,255,255,0.55);
   outline-offset: -6px;
+  box-shadow: 0 18px 34px rgba(0,0,0,0.45);
+}
+.missionItem.done{
+  opacity: 0.95;
+  border-color: rgba(255,255,255,0.20);
+}
+.missionItem.done .missionBadge{
+  background: rgba(255,255,255,0.16);
 }
 
-/* RIGHT: active mission details */
+/* =========================
+   RIGHT PANEL (DETAILS)
+   ========================= */
 #missionDetail{
   height:100%;
-  display:flex;
 }
 
 .detailCard{
-  width:100%;
   height:100%;
   border-radius:22px;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.62);
   border:1px solid rgba(255,255,255,0.16);
-  box-shadow:0 14px 30px rgba(0,0,0,0.25);
+  box-shadow:0 10px 22px rgba(0,0,0,0.25);
   backdrop-filter: blur(2px);
+  padding: 1.6em 1.7em;
   display:flex;
   flex-direction:column;
-  padding: 1.2em 1.25em;
-  overflow:hidden;
-}
-
-.detailHeader{
-  padding-bottom: 0.8em;
-  border-bottom: 1px solid rgba(255,255,255,0.14);
+  justify-content:center;
 }
 
 .detailKicker{
   font-weight:900;
-  letter-spacing:0.22em;
+  letter-spacing:0.26em;
   text-transform:uppercase;
-  opacity:0.85;
-  font-size:clamp(11px,1.25vw,14px);
+  opacity:0.92;
+  font-size:clamp(12px,1.2vw,16px);
 }
 
 .detailTitle{
-  margin-top:0.25em;
+  margin-top:0.35em;
   font-weight:1000;
-  letter-spacing:0.10em;
   text-transform:uppercase;
-  font-size:clamp(22px,3.1vw,44px);
-  text-shadow: 0 0 16px rgba(255,255,255,0.14);
+  letter-spacing:0.10em;
+  font-size:clamp(22px,2.4vw,38px);
+  text-shadow:0 0 12px rgba(0,0,0,0.55);
 }
 
 .detailDesc{
-  margin-top:0.55em;
+  margin-top:0.5em;
   opacity:0.92;
-  font-size:clamp(14px,1.7vw,18px);
-  line-height:1.4;
+  font-size:clamp(14px,1.4vw,18px);
+  line-height:1.35;
 }
 
-.detailBody{
-  flex:1;
-  overflow:auto; /* if needed, only the right panel scrolls */
-  padding-top: 1.0em;
-}
-
-.detailBlock{
-  margin-bottom: 1.1em;
-}
-
-.blockTitle{
-  font-weight:900;
-  letter-spacing:0.18em;
+.sectionTitle{
+  margin-top:1.25em;
+  font-weight:950;
   text-transform:uppercase;
-  font-size:clamp(11px,1.3vw,14px);
-  opacity:0.85;
-  margin-bottom: 0.55em;
+  letter-spacing:0.16em;
+  font-size:clamp(12px,1.2vw,16px);
+  opacity:0.9;
 }
 
+/* Objectives */
 .objectives{
-  margin:0;
+  margin:0.8em 0 0 0;
   padding:0;
   list-style:none;
   display:grid;
-  gap:0.55em;
+  gap:0.45em;
 }
 
 .objectives li{
   display:flex;
   align-items:baseline;
-  gap:0.65em;
-  font-size:clamp(14px,1.7vw,18px);
-  line-height:1.25;
-  opacity:0.95;
+  gap:0.55em;
+  font-size:clamp(16px,1.8vw,24px); /* larger for TV */
+  line-height:1.2;
 }
 
 .objectives .bullet{
@@ -270,30 +251,35 @@ html,body{
   font-weight:1000;
 }
 
-.riddleBox{
-  padding: 0.95em 1.0em;
-  border-radius:16px;
+.objectives li.done{ opacity:0.95; }
+.objectives li.active{ opacity:0.95; }
+
+/* Riddle */
+.orderRiddle{
+  margin-top:1.25em;
+  padding:1.0em 1.05em;
+  border-radius:18px;
   background: rgba(0,0,0,0.38);
   border:1px solid rgba(255,255,255,0.18);
-  font-size:clamp(14px,1.7vw,18px);
-  line-height:1.45;
+}
+
+.orderRiddle .tag{
+  font-size:clamp(12px,1.2vw,16px);
+  text-transform:uppercase;
+  letter-spacing:0.16em;
+  opacity:0.85;
+  font-weight:900;
+}
+
+.orderRiddle .riddleText{
+  margin-top:0.45em;
+  font-size:clamp(16px,1.8vw,24px); /* larger for TV */
+  line-height:1.35;
   opacity:0.95;
 }
 
-.detailFooter{
-  padding-top: 0.85em;
-  border-top: 1px solid rgba(255,255,255,0.14);
-}
-
-.detailFine{
-  opacity:0.72;
-  font-weight:800;
-  letter-spacing:0.06em;
-  font-size:clamp(11px,1.25vw,13px);
-}
-
 /* =========================
-   OVERLAYS (SUCCESS / FAILURE / OVERTIME)
+   OVERLAYS (SUCCESS / FAILURE) - FESTIVE
    ========================= */
 .overlay{
   position:fixed;
@@ -314,6 +300,7 @@ html,body{
   pointer-events:auto;
 }
 
+/* subtle sparkle texture */
 .overlay::before{
   content:"";
   position:absolute;
@@ -349,6 +336,7 @@ html,body{
   overflow:hidden;
 }
 
+/* candy-cane accent strip across the top */
 .overlay-card::before{
   content:"";
   position:absolute;
@@ -362,12 +350,14 @@ html,body{
   opacity:0.95;
 }
 
+/* success theme */
 .overlay-card.success{
   background:
     radial-gradient(900px 600px at 50% 15%, rgba(255,255,255,0.20), rgba(255,255,255,0.06)),
     linear-gradient(135deg, rgba(3,18,40,0.90), rgba(184,134,11,0.35));
 }
 
+/* optional glow bloom */
 .overlay-card.success::after{
   content:"";
   position:absolute;
@@ -376,20 +366,15 @@ html,body{
   pointer-events:none;
 }
 
+/* failure theme */
 .overlay-card.failure{
   background:
     radial-gradient(900px 600px at 50% 15%, rgba(255,255,255,0.14), rgba(255,255,255,0.04)),
     linear-gradient(135deg, rgba(60,0,0,0.92), rgba(0,0,0,0.70));
 }
 
-.overlay-card.overtime{
-  background:
-    radial-gradient(900px 600px at 50% 15%, rgba(255,255,255,0.16), rgba(255,255,255,0.05)),
-    linear-gradient(135deg, rgba(8,8,14,0.92), rgba(10,30,60,0.55));
-}
-
 .kicker{
-  margin-top:10px;
+  margin-top:10px; /* below candy strip */
   font-weight:900;
   letter-spacing:0.26em;
   text-transform:uppercase;
@@ -415,7 +400,10 @@ html,body{
   opacity:0.95;
 }
 
-.fine{ opacity:0.90; font-weight:800; }
+.fine{
+  opacity:0.90;
+  font-weight:800;
+}
 
 .time-row{
   margin: 1.4em auto 0;
@@ -459,126 +447,24 @@ html,body{
   transform: translateY(0);
 }
 
+/* Failure overlay title glow tweak */
 .overlay-card.failure .big{
   text-shadow:
     0 0 16px rgba(255,120,120,0.18),
     0 18px 40px rgba(0,0,0,0.55);
 }
 
-/* Overtime form */
-.overtimeForm{
-  width: min(560px, 92%);
-  margin: 1.1em auto 0;
-  text-align:left;
-}
-
-.overtimeLabel{
-  display:block;
-  margin: 0 0 0.45em;
-  font-weight:900;
-  letter-spacing:0.18em;
-  text-transform:uppercase;
-  font-size:clamp(12px,1.3vw,14px);
-  opacity:0.9;
-}
-
-.overtimeRow{
-  display:flex;
-  gap:0.75em;
-  align-items:stretch;
-}
-
-.overtimeInput{
-  flex:1;
-  border-radius:16px;
-  border:2px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.35);
-  color:#fff;
-  padding: 0.9em 1.0em;
-  font-size: clamp(14px, 2.0vw, 18px);
-  letter-spacing:0.12em;
-  text-transform:uppercase;
-  outline:none;
-}
-
-.overtimeInput:focus{
-  border-color: rgba(255,255,255,0.40);
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.10);
-}
-
-.overtimeBtn{
-  border-radius:16px;
-  border:2px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.10);
-  color:#fff;
-  padding: 0.9em 1.1em;
-  font-weight:1000;
-  letter-spacing:0.18em;
-  text-transform:uppercase;
-  cursor:pointer;
-}
-
-.overtimeBtn:active{ transform: translateY(1px); }
-
-.overtimeMsg{
-  margin-top:0.7em;
-  min-height:1.25em;
-  text-align:center;
-  font-weight:900;
-  letter-spacing:0.10em;
-  opacity:0.95;
-}
-
-.overtimeHint{
-  margin-top: 0.9em;
-  opacity:0.70;
-  font-size: clamp(12px, 1.4vw, 14px);
-  letter-spacing:0.06em;
-  text-align:center;
-}
-
-.overlay.bad .overlay-card.overtime{ border-color: rgba(255,80,80,0.55); }
-.overlay.ok  .overlay-card.overtime{ border-color: rgba(80,255,160,0.45); }
-
-.overlay.urgent .time-row{
-  border-color: rgba(255,120,120,0.45);
-  box-shadow:
-    inset 0 2px 6px rgba(0,0,0,0.55),
-    0 0 0 4px rgba(255,120,120,0.08);
-}
-
-.overlay.urgent .time-value{
-  animation: pulse 0.8s ease-in-out infinite;
-}
-
-@keyframes pulse{
-  0%,100%{ transform: scale(1); }
-  50%{ transform: scale(1.02); }
-}
-
-/* Glitch */
-body.glitch{ animation: glitchFlash 0.18s linear 6; }
-@keyframes glitchFlash{
-  0%{ filter:none; transform: translate(0,0); }
-  20%{ filter:contrast(1.2) brightness(1.1); transform: translate(1px,0); }
-  40%{ filter:hue-rotate(10deg); transform: translate(-1px,1px); }
-  60%{ filter:contrast(0.9) brightness(0.9); transform: translate(0,-1px); }
-  80%{ filter:none; transform: translate(1px,1px); }
-  100%{ filter:none; transform: translate(0,0); }
-}
-
-/* Util */
+/* =========================
+   UTIL
+   ========================= */
 .hidden{ display:none !important; }
 
-/* Smaller screens */
+/* =========================
+   MOBILE / SMALL SCREENS
+   ========================= */
 @media (max-width:900px){
-  html, body{ overflow:auto; }
+  html,body{ overflow:auto; }
   #mainContent{ height:auto; }
-  #splitShell{
-    grid-template-columns: 1fr;
-  }
-  #missionList{ height:auto; }
-  .missionListInner{ justify-content:flex-start; }
-  #missionDetail{ height:auto; }
-  .detailCard{ height:auto; }
+  #splitShell{ grid-template-columns: 1fr; height:auto; }
+  #missionList{ justify-content:flex-start; }
 }

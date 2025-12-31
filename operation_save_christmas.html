@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Operation: Save Christmas</title>
-  <link rel="stylesheet" href="operation_save_christmas.css">
+  <link rel="stylesheet" href="operation_save_christmas.css?v=2025-12-31b">
 </head>
 <body>
   <!-- TOP BAR -->
@@ -23,101 +23,30 @@
     </div>
   </div>
 
-  <!-- MAIN CONTENT (SPLIT SCREEN) -->
+  <!-- MAIN CONTENT -->
   <div id="mainContent">
-    <div id="splitShell" aria-label="Mission Control">
+    <div id="splitShell" aria-label="Mission split layout">
       <!-- LEFT: mission list -->
-      <aside id="missionList" aria-label="Mission list">
-        <div class="missionListInner">
-          <div class="missionItem" data-step="1">
-            <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
-            <div class="missionText">
-              <div class="missionLabel">Algorithm Restored</div>
-              <div class="missionDesc">Stabilize the Naughty/Nice core.</div>
-            </div>
-          </div>
-
-          <div class="missionItem" data-step="2">
-            <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
-            <div class="missionText">
-              <div class="missionLabel">Rogue Elf Apprehended</div>
-              <div class="missionDesc">Identify and contain the saboteur.</div>
-            </div>
-          </div>
-
-          <div class="missionItem" data-step="3">
-            <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
-            <div class="missionText">
-              <div class="missionLabel">Flight Path Restored</div>
-              <div class="missionDesc">Rebuild Santa’s route to launch.</div>
-            </div>
-          </div>
-
-          <div class="missionItem" data-step="4">
-            <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
-            <div class="missionText">
-              <div class="missionLabel">Santa Cleared for Takeoff</div>
-              <div class="missionDesc">Final checks and lockbox access.</div>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <div id="missionList" aria-label="Missions">
+        <!-- JS injects mission items here -->
+      </div>
 
       <!-- RIGHT: active mission details -->
-      <section id="missionDetail" aria-label="Active mission details">
+      <div id="missionDetail" aria-label="Active mission details">
         <div class="detailCard">
-          <div class="detailHeader">
-            <div id="activeKicker" class="detailKicker">ACTIVE MISSION</div>
-            <div id="activeTitle" class="detailTitle">--</div>
-            <div id="activeDesc" class="detailDesc">--</div>
-          </div>
+          <div class="detailKicker">ACTIVE MISSION</div>
+          <div id="detailTitle" class="detailTitle">--</div>
+          <div id="detailDesc" class="detailDesc">--</div>
 
-          <div class="detailBody">
-            <div class="detailBlock">
-              <div class="blockTitle">Objectives</div>
-              <ul id="activeObjectives" class="objectives"></ul>
-            </div>
+          <div class="sectionTitle">Objectives</div>
+          <ul class="objectives" id="detailObjectives"></ul>
 
-            <div class="detailBlock">
-              <div class="blockTitle">Order Riddle</div>
-              <div id="activeRiddle" class="riddleBox">--</div>
-            </div>
-          </div>
-
-          <div class="detailFooter">
-            <span class="detailFine">North Pole Command · NPIA Secure Broadcast</span>
+          <div class="orderRiddle" id="detailRiddle">
+            <div class="tag">Order Riddle</div>
+            <div class="riddleText">--</div>
           </div>
         </div>
-      </section>
-    </div>
-  </div>
-
-  <!-- OVERTIME OVERLAY -->
-  <div id="overtimeOverlay" class="overlay">
-    <div class="overlay-card overtime">
-      <div class="kicker">UNAUTHORIZED INTERFERENCE DETECTED</div>
-      <div class="big">FINAL AUTHORIZATION REQUIRED</div>
-
-      <div class="sub">
-        A recovered transmission requires a single-word password.<br>
-        <span class="fine">Decrypt the message and enter the password before the window closes.</span>
       </div>
-
-      <div class="time-row">
-        <div class="time-label">OVERTIME WINDOW</div>
-        <div id="overtimeTimer" class="time-value">10:00</div>
-      </div>
-
-      <form id="overtimeForm" class="overtimeForm" autocomplete="off">
-        <label class="overtimeLabel" for="overtimeInput">PASSWORD</label>
-        <div class="overtimeRow">
-          <input id="overtimeInput" class="overtimeInput" type="text" spellcheck="false" placeholder="ENTER PASSWORD">
-          <button class="overtimeBtn" type="submit">SUBMIT</button>
-        </div>
-        <div id="overtimeMsg" class="overtimeMsg" aria-live="polite"></div>
-      </form>
-
-      <div class="overtimeHint">Tip: case doesn’t matter.</div>
     </div>
   </div>
 
@@ -156,6 +85,6 @@
     </div>
   </div>
 
-  <script src="operation_save_christmas.js"></script>
+  <script src="operation_save_christmas.js?v=2025-12-31b"></script>
 </body>
 </html>
