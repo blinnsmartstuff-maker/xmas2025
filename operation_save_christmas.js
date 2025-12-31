@@ -25,6 +25,13 @@
     return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
   }
 
+  function formatMS(ms){
+    const total = Math.max(0, Math.floor(ms / 1000));
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return `${pad2(m)}:${pad2(s)}`;
+  }
+
   // ---------------------------------
   // Mission metadata
   // ---------------------------------
@@ -56,13 +63,20 @@
   const params = new URLSearchParams(window.location.search);
   const stageRaw = (params.get('stage') || '').toString().trim().toLowerCase();
 
-  const successOverlay = document.getElementById('successOverlay');
-  const failureOverlay = document.getElementById('failureOverlay');
-  const successTimeEl  = document.getElementById('successTime');
+  const successOverlay  = document.getElementById('successOverlay');
+  const failureOverlay  = document.getElementById('failureOverlay');
+  const overtimeOverlay = document.getElementById('overtimeOverlay');
+
+  const successTimeEl   = document.getElementById('successTime');
+  const overtimeTimeEl  = document.getElementById('overtimeTime');
+  const overtimeInput   = document.getElementById('overtimeInput');
+  const overtimeSubmit  = document.getElementById('overtimeSubmit');
+  const overtimeMsg     = document.getElementById('overtimeMsg');
 
   const header    = document.getElementById('header');
   const subtitle  = document.getElementById('subtitle');
   const countdown = document.getElementById('countdown');
+  const countdownLabel = document.getElementById('countdownLabel');
 
   const missionList = document.getElementById('missionList');
   const detailTitle = document.getElementById('detailTitle');
@@ -71,6 +85,8 @@
   const detailRiddle = document.getElementById('detailRiddle');
 
   let endStateShown = false;
+  let overtimeInterval = null;
+  let clockInterval = null;
 
   // ---------------------------------
   // Stage overrides
@@ -109,40 +125,123 @@
   document.body.style.background = colors[clamped];
   document.body.style.color = textColors[clamped];
 
-  // Render the split UI
   renderSplitUI(clamped);
 
-  // Countdown loop (also triggers fail at midnight)
-  function updateClock(){
-    const remaining = getTimeRemainingToMidnight();
-    if (countdown) {
-      if (remaining <= 0) countdown.textContent = "00:00:00 until midnight";
-      else countdown.textContent = `${formatHMS(remaining)} until midnight`;
-    }
-
-    // If time is out, decide outcome
-    if (remaining <= 0) {
-      if (clamped < 4) showFailureOverlay(false);
-      else showSuccessOverlay(false);
-    }
+  // If stage=4 => trigger OVERTIME instead of midnight logic
+  if (clamped === 4) {
+    startOvertime();
+    return;
   }
-  setInterval(updateClock, 1000);
-  updateClock();
 
-  // If stage=4, do NOT auto-show success immediately anymore (you later wanted a twist).
-  // Keeping your previous behavior would override your new idea.
-  // If you want it back, uncomment below:
-  // if (clamped === 4) setTimeout(() => showSuccessOverlay(false), 2500);
+  // Otherwise, normal midnight countdown + auto-fail at midnight
+  startMidnightCountdown();
+
+  // ---------------------------------
+  // Midnight countdown
+  // ---------------------------------
+  function startMidnightCountdown(){
+    function updateClock(){
+      const remaining = getTimeRemainingToMidnight();
+      if (countdown) {
+        if (remaining <= 0) countdown.textContent = "00:00:00 until midnight";
+        else countdown.textContent = `${formatHMS(remaining)} until midnight`;
+      }
+      if (remaining <= 0) showFailureOverlay(false);
+    }
+
+    clockInterval = setInterval(updateClock, 1000);
+    updateClock();
+  }
+
+  // ---------------------------------
+  // OVERTIME (10 minute timer + password)
+  // ---------------------------------
+  function startOvertime(){
+    // Replace countdown header text
+    if (countdownLabel) countdownLabel.textContent = "OVERTIME";
+    if (countdown) countdown.textContent = "10:00 remaining";
+
+    // Persist overtime start so refresh doesn't reset it
+    const KEY = "osc_overtime_start_ms";
+    const DURATION_MS = 10 * 60 * 1000;
+
+    let startMs = parseInt(localStorage.getItem(KEY) || "", 10);
+    if (!Number.isFinite(startMs) || startMs <= 0) {
+      startMs = Date.now();
+      localStorage.setItem(KEY, String(startMs));
+    }
+
+    // Show overlay
+    overtimeOverlay?.classList.add('visible');
+
+    // Focus input for TV keyboard use
+    setTimeout(() => overtimeInput?.focus(), 250);
+
+    // Wire submit
+    const correct = "midnight";
+    function attempt(){
+      const val = (overtimeInput?.value || "").trim().toLowerCase();
+      if (!val) {
+        setMsg("Enter the password.", true);
+        wiggleInput();
+        return;
+      }
+      if (val === correct) {
+        // clear overtime state so it won't re-trigger on reload
+        localStorage.removeItem(KEY);
+        showSuccessOverlay(false);
+        return;
+      }
+      setMsg("Incorrect. Try again.", true);
+      wiggleInput();
+      overtimeInput?.select();
+    }
+
+    overtimeSubmit?.addEventListener("click", attempt);
+    overtimeInput?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") attempt();
+    });
+
+    // Tick timer
+    function tick(){
+      const elapsed = Date.now() - startMs;
+      const remaining = Math.max(0, DURATION_MS - elapsed);
+
+      // Update HUD countdown AND overlay countdown
+      const mmss = formatMS(remaining);
+      if (countdown) countdown.textContent = `${mmss} remaining`;
+      if (overtimeTimeEl) overtimeTimeEl.textContent = mmss;
+
+      if (remaining <= 0) {
+        localStorage.removeItem(KEY);
+        showFailureOverlay(false);
+      }
+    }
+
+    overtimeInterval = setInterval(tick, 250);
+    tick();
+  }
+
+  function setMsg(text, isBad){
+    if (!overtimeMsg) return;
+    overtimeMsg.textContent = text;
+    overtimeMsg.classList.toggle("bad", !!isBad);
+  }
+
+  function wiggleInput(){
+    const wrap = document.querySelector(".passwordInputWrap");
+    wrap?.classList.remove("wiggle");
+    // force reflow
+    void wrap?.offsetWidth;
+    wrap?.classList.add("wiggle");
+  }
 
   // ---------------------------------
   // Split UI renderer
   // ---------------------------------
   function renderSplitUI(currentStage){
-    // currentStage: 0..4
-    // Active mission = currentStage+1 (unless complete)
     const activeMission = (currentStage < 4) ? (currentStage + 1) : 4;
 
-    // Left panel missions
     if (missionList) {
       missionList.innerHTML = [1,2,3,4].map(m => {
         const meta = missionMeta[m];
@@ -164,36 +263,24 @@
       }).join("");
     }
 
-    // Right panel details (active mission only)
     const meta = missionMeta[activeMission];
     if (detailTitle) detailTitle.textContent = meta?.title || "--";
     if (detailDesc)  detailDesc.textContent  = meta?.desc || "--";
 
-    // Objectives list
     const items = objectivesByStep[activeMission] || [];
-    const isComplete = (currentStage >= 4);
     if (detailObjectives) {
-      detailObjectives.innerHTML = items.map((txt, i) => {
-        // if mission is done, show checks; if active, bullets; if future, dim bullets
-        const missionDone = activeMission <= currentStage;
+      const missionDone = activeMission <= currentStage;
+      detailObjectives.innerHTML = items.map((txt) => {
         const bullet = missionDone ? "✔" : "•";
         const cls = missionDone ? "done" : "active";
         return `<li class="${cls}"><span class="bullet">${bullet}</span><span>${txt}</span></li>`;
       }).join("");
-      if (isComplete) {
-        // If complete, keep it clean
-        detailObjectives.innerHTML = `<li class="done"><span class="bullet">✔</span><span>All missions complete</span></li>`;
-      }
     }
 
-    // Riddle
     const riddleText = orderRiddleByStep[activeMission] || "--";
     if (detailRiddle) {
       const riddleTextEl = detailRiddle.querySelector('.riddleText');
       if (riddleTextEl) riddleTextEl.textContent = riddleText;
-      if (isComplete) {
-        if (riddleTextEl) riddleTextEl.textContent = "Stand by for next instructions.";
-      }
     }
   }
 
@@ -201,7 +288,6 @@
   // Overlay handlers
   // ---------------------------------
   function hideMainUI(){
-    // Split layout lives under #mainContent; hide it
     document.getElementById('mainContent')?.classList.add('hidden');
     header?.classList.add('hidden');
     subtitle?.classList.add('hidden');
@@ -211,6 +297,8 @@
     if (endStateShown) return;
     endStateShown = true;
 
+    cleanupTimers();
+
     const remaining = getTimeRemainingToMidnight();
     if (successTimeEl) {
       successTimeEl.textContent = isOverride ? "SUCCESS MODE" : formatHMS(remaining);
@@ -218,6 +306,7 @@
 
     hideMainUI();
 
+    if (countdownLabel) countdownLabel.textContent = "STATUS";
     if (countdown) countdown.textContent = isOverride ? "SUCCESS MODE" : `${formatHMS(remaining)} remaining`;
 
     document.body.style.background = "linear-gradient(135deg, #061a33, #b8860b)";
@@ -230,12 +319,21 @@
     if (endStateShown) return;
     endStateShown = true;
 
+    cleanupTimers();
+
     hideMainUI();
-    if (countdown) countdown.textContent = isOverride ? "FAILURE MODE" : "00:00:00 until midnight";
+
+    if (countdownLabel) countdownLabel.textContent = "STATUS";
+    if (countdown) countdown.textContent = isOverride ? "FAILURE MODE" : "TIME EXPIRED";
 
     document.body.style.background = "linear-gradient(135deg, #2b0000, #000000)";
     document.body.style.color = "#ffdddd";
 
     failureOverlay?.classList.add('visible');
+  }
+
+  function cleanupTimers(){
+    if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
+    if (overtimeInterval) { clearInterval(overtimeInterval); overtimeInterval = null; }
   }
 })();

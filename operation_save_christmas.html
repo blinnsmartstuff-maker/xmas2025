@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Operation: Save Christmas</title>
-  <link rel="stylesheet" href="operation_save_christmas.css?v=2025-12-31b">
+  <link rel="stylesheet" href="operation_save_christmas.css?v=2025-12-31c">
 </head>
 <body>
   <!-- TOP BAR -->
@@ -27,9 +27,7 @@
   <div id="mainContent">
     <div id="splitShell" aria-label="Mission split layout">
       <!-- LEFT: mission list -->
-      <div id="missionList" aria-label="Missions">
-        <!-- JS injects mission items here -->
-      </div>
+      <div id="missionList" aria-label="Missions"></div>
 
       <!-- RIGHT: active mission details -->
       <div id="missionDetail" aria-label="Active mission details">
@@ -47,6 +45,36 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- OVERTIME OVERLAY (STAGE=4) -->
+  <div id="overtimeOverlay" class="overlay">
+    <div class="overlay-card overtime">
+      <div class="kicker">SYSTEM ANOMALY DETECTED</div>
+      <div class="big">OVERTIME PROTOCOL</div>
+
+      <div class="sub">
+        A failsafe has engaged. You have <b>10 minutes</b> to enter the correct password.<br>
+        <span class="fine">Decrypt the code inside Lockbox 4.</span>
+      </div>
+
+      <div class="time-row">
+        <div class="time-label">OVERTIME REMAINING</div>
+        <div id="overtimeTime" class="time-value">10:00</div>
+      </div>
+
+      <div class="passwordRow">
+        <div class="passwordLabel">PASSWORD</div>
+        <div class="passwordInputWrap">
+          <input id="overtimeInput" type="text" inputmode="text" autocomplete="off" spellcheck="false"
+                 placeholder="Enter password…" />
+          <button id="overtimeSubmit" type="button">UNLOCK</button>
+        </div>
+        <div id="overtimeMsg" class="passwordMsg" aria-live="polite"></div>
+      </div>
+
+      <div class="standdown">Move fast. Stay calm. Save Christmas.</div>
     </div>
   </div>
 
@@ -75,7 +103,7 @@
       <div class="kicker">MISSION FAILED</div>
       <div class="big">CHRISTMAS COMPROMISED</div>
       <div class="sub">
-        Midnight has passed. Systems did not stabilize in time.<br>
+        Time has expired. The failsafe could not be cleared.<br>
         <span class="fine">Better luck next year, Agents.</span>
       </div>
       <div class="time-row">
@@ -85,6 +113,6 @@
     </div>
   </div>
 
-  <script src="operation_save_christmas.js?v=2025-12-31b"></script>
+  <script src="operation_save_christmas.js?v=2025-12-31c"></script>
 </body>
 </html>
