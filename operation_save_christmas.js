@@ -32,28 +32,28 @@
   }
 
   // ---------------------------------
-  // Objectives + Order Riddles
+  // Objectives + Order Riddles (UPDATED NAMES)
   // ---------------------------------
   const objectivesByStep = {
     1: [
-      "Puzzle A: Apply the corrupted rules to classify behaviors",
-      "Puzzle B: Identify the correct ornament set (two conditions)",
-      "Puzzle C: Alphabetize Santa’s list and extract the index digit"
+      "Puzzle A: Elf Party Incident Log (Naughty = 1, Nice = 2) → land on a 0",
+      "Puzzle B: Tree Deduction Rules → find the single false statement",
+      "Puzzle C: Missing Ingredient Cipher → solve 5 words, apply the recipe formula"
     ],
     2: [
-      "Puzzle A: Identify the rogue elf from the statement cards",
-      "Puzzle B: Spot the mislabeled gift tag and correct the unit",
-      "Puzzle C: Decode the ELF acrostic transmission"
+      "Puzzle A: Route Overlay Map (Acetate) → identify the only valid route",
+      "Puzzle B: Rule Compliance Check → confirm all constraints are satisfied",
+      "Puzzle C: Map ID Extraction → report the route’s ID digit"
     ],
     3: [
-      "Puzzle A: Align the overlay to reveal the X / coordinate",
-      "Puzzle B: Order the reindeer correctly and extract the digit",
-      "Puzzle C: Use the house as the map to locate the button"
+      "Puzzle A: LEGO Row Assembly → order rows correctly to form the digit",
+      "Puzzle B: Flip & Align Rows → mirror/rotate rows until the digit resolves",
+      "Puzzle C: Color-Rule Verification → confirm your digit uses the required colors"
     ],
     4: [
-      "Puzzle A: Identify the mission pattern to produce a digit",
-      "Puzzle B: Use the countdown clue to produce a digit",
-      "Puzzle C: Apply the Santa constant to produce a digit"
+      "Puzzle A: Signal Training Round → classify 10 sounds by frequency/duration/stability",
+      "Puzzle B: Rule Reveal & Decode → convert your notes into digits",
+      "Puzzle C: Final Lock Entry → unlock Box 4 and initiate the override"
     ]
   };
 
@@ -77,8 +77,9 @@
 
       // stage=0 => mission 1 is active
       // stage=1 => mission 2 is active
-      // ...
-      // stage=4 => none active (complete)
+      // stage=2 => mission 3 is active
+      // stage=3 => mission 4 is active
+      // stage=4 => complete (overtime trigger)
       const isActive = (currentStage < 4) && (stepNum === (currentStage + 1));
 
       // Card state classes
@@ -87,7 +88,6 @@
       // collapse (hide details) if not active
       stepEl.classList.toggle("collapsed", !isActive);
 
-      // Build objectives content (even if hidden when collapsed; safe + simple)
       const items = objectivesByStep[stepNum] || [];
       list.innerHTML = items.map((txt) => {
         const bullet = isDone ? "✔" : "•";
@@ -95,7 +95,6 @@
         return `<li class="${cls}"><span class="bullet">${bullet}</span><span>${txt}</span></li>`;
       }).join("");
 
-      // Build riddle content
       const riddleText = orderRiddleByStep[stepNum] || "";
       riddleBox.innerHTML = `
         <div class="tag">Order Riddle</div>
@@ -208,16 +207,14 @@
   updateClock();
 
   // ---------------------------------
-  // Stage 4 trigger → OVERTIME (requested)
+  // Stage 4 trigger → OVERTIME
   // ---------------------------------
   if (clamped === 4) {
-    // Stop the midnight clock. Overtime determines outcome now.
     if (clockInterval) {
       clearInterval(clockInterval);
       clockInterval = null;
     }
 
-    // Let the Stage 4 "completion" sit for a beat, then glitch into overtime
     setTimeout(() => {
       document.body.classList.add('glitch');
       setTimeout(() => {
@@ -278,29 +275,24 @@
   let overtimeInterval = null;
 
   function enterOvertimeMode(isOverride){
-    if (endStateShown) return; // don't allow overtime if already succeeded/failed
+    if (endStateShown) return;
     if (!overtimeOverlay || !overtimeTimerEl || !overtimeForm || !overtimeInput || !overtimeMsg) {
-      // If overtime UI is missing, fall back to success (safe)
       showSuccessOverlay(true);
       return;
     }
 
-    // Hide main UI and show overtime overlay
     hideMainUI();
 
     overtimeOverlay.classList.add('visible');
     overtimeOverlay.classList.remove('bad', 'ok', 'urgent');
 
-    // Update the top bar label if still present (in case you later unhide it)
     if (countdownLabel) countdownLabel.textContent = "Final Authorization Window";
     if (countdown) countdown.textContent = "10:00 remaining";
 
-    // Initialize timer
     overtimeRemaining = OVERTIME_SECONDS;
     overtimeTimerEl.textContent = formatMMSS(overtimeRemaining);
     overtimeMsg.textContent = "";
 
-    // Focus for keyboard / FireTV remote
     setTimeout(() => overtimeInput.focus(), 200);
 
     overtimeInterval = setInterval(() => {
@@ -321,7 +313,6 @@
       }
     }, 1000);
 
-    // Submit handler (attach once)
     if (!overtimeForm.dataset.bound) {
       overtimeForm.dataset.bound = "1";
       overtimeForm.addEventListener('submit', (e) => {
