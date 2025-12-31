@@ -23,54 +23,72 @@
     </div>
   </div>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN CONTENT (SPLIT SCREEN) -->
   <div id="mainContent">
-    <div id="tracker" aria-label="Mission tracker">
+    <div id="splitShell" aria-label="Mission Control">
+      <!-- LEFT: mission list -->
+      <aside id="missionList" aria-label="Mission list">
+        <div class="missionListInner">
+          <div class="missionItem" data-step="1">
+            <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
+            <div class="missionText">
+              <div class="missionLabel">Algorithm Restored</div>
+              <div class="missionDesc">Stabilize the Naughty/Nice core.</div>
+            </div>
+          </div>
 
-      <div class="step" data-step="1">
-        <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
-        <div class="text">
-          <div class="label">Algorithm Restored</div>
-          <div class="desc">Reboot the Naughty/Nice core and stabilize the system.</div>
+          <div class="missionItem" data-step="2">
+            <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
+            <div class="missionText">
+              <div class="missionLabel">Rogue Elf Apprehended</div>
+              <div class="missionDesc">Identify and contain the saboteur.</div>
+            </div>
+          </div>
 
-          <ul class="objectives" id="obj-1"></ul>
-          <div class="orderRiddle" id="riddle-1"></div>
+          <div class="missionItem" data-step="3">
+            <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
+            <div class="missionText">
+              <div class="missionLabel">Flight Path Restored</div>
+              <div class="missionDesc">Rebuild Santa’s route to launch.</div>
+            </div>
+          </div>
+
+          <div class="missionItem" data-step="4">
+            <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
+            <div class="missionText">
+              <div class="missionLabel">Santa Cleared for Takeoff</div>
+              <div class="missionDesc">Final checks and lockbox access.</div>
+            </div>
+          </div>
         </div>
-      </div>
+      </aside>
 
-      <div class="step" data-step="2">
-        <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
-        <div class="text">
-          <div class="label">Rogue Elf Apprehended</div>
-          <div class="desc">Identify and contain the saboteur hiding among the gifts.</div>
+      <!-- RIGHT: active mission details -->
+      <section id="missionDetail" aria-label="Active mission details">
+        <div class="detailCard">
+          <div class="detailHeader">
+            <div id="activeKicker" class="detailKicker">ACTIVE MISSION</div>
+            <div id="activeTitle" class="detailTitle">--</div>
+            <div id="activeDesc" class="detailDesc">--</div>
+          </div>
 
-          <ul class="objectives" id="obj-2"></ul>
-          <div class="orderRiddle" id="riddle-2"></div>
+          <div class="detailBody">
+            <div class="detailBlock">
+              <div class="blockTitle">Objectives</div>
+              <ul id="activeObjectives" class="objectives"></ul>
+            </div>
+
+            <div class="detailBlock">
+              <div class="blockTitle">Order Riddle</div>
+              <div id="activeRiddle" class="riddleBox">--</div>
+            </div>
+          </div>
+
+          <div class="detailFooter">
+            <span class="detailFine">North Pole Command · NPIA Secure Broadcast</span>
+          </div>
         </div>
-      </div>
-
-      <div class="step" data-step="3">
-        <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
-        <div class="text">
-          <div class="label">Flight Path Restored</div>
-          <div class="desc">Reconstruct Santa’s global route before takeoff.</div>
-
-          <ul class="objectives" id="obj-3"></ul>
-          <div class="orderRiddle" id="riddle-3"></div>
-        </div>
-      </div>
-
-      <div class="step" data-step="4">
-        <img src="./christmas_candy.png" class="icon cane" alt="Candy cane">
-        <div class="text">
-          <div class="label">Santa Cleared for Takeoff</div>
-          <div class="desc">Power the sleigh, lock in coordinates, and launch.</div>
-
-          <ul class="objectives" id="obj-4"></ul>
-          <div class="orderRiddle" id="riddle-4"></div>
-        </div>
-      </div>
-
+      </section>
     </div>
   </div>
 

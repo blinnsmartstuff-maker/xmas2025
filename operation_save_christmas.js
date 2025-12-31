@@ -32,28 +32,35 @@
   }
 
   // ---------------------------------
-  // Objectives + Order Riddles (UPDATED NAMES)
+  // Mission content (shorter objectives)
   // ---------------------------------
+  const missionMeta = {
+    1: { title: "Algorithm Restored", desc: "Stabilize the Naughty/Nice core." },
+    2: { title: "Rogue Elf Apprehended", desc: "Identify and contain the saboteur." },
+    3: { title: "Flight Path Restored", desc: "Rebuild Santa’s route to launch." },
+    4: { title: "Santa Cleared for Takeoff", desc: "Final checks and lockbox access." }
+  };
+
   const objectivesByStep = {
     1: [
-      "Puzzle A: Elf Party Incident Log (Naughty = 1, Nice = 2) → land on a 0",
-      "Puzzle B: Tree Deduction Rules → find the single false statement",
-      "Puzzle C: Missing Ingredient Cipher → solve 5 words, apply the recipe formula"
+      "Elf Party Log (score the elf actions)",
+      "Tree Deduction (spot the one false rule)",
+      "Missing Ingredient (solve the formula)"
     ],
     2: [
-      "Puzzle A: Route Overlay Map (Acetate) → identify the only valid route",
-      "Puzzle B: Rule Compliance Check → confirm all constraints are satisfied",
-      "Puzzle C: Map ID Extraction → report the route’s ID digit"
+      "Map Routes (find the only valid path)",
+      "Rules Audit (confirm all constraints)",
+      "Route ID (extract the digit)"
     ],
     3: [
-      "Puzzle A: LEGO Row Assembly → order rows correctly to form the digit",
-      "Puzzle B: Flip & Align Rows → mirror/rotate rows until the digit resolves",
-      "Puzzle C: Color-Rule Verification → confirm your digit uses the required colors"
+      "LEGO Rows (order the strips)",
+      "Flip & Align (resolve the digit)",
+      "Color Rules (verify the build)"
     ],
     4: [
-      "Puzzle A: Signal Training Round → classify 10 sounds by frequency/duration/stability",
-      "Puzzle B: Rule Reveal & Decode → convert your notes into digits",
-      "Puzzle C: Final Lock Entry → unlock Box 4 and initiate the override"
+      "Sound Notes (listen + classify)",
+      "Rule Reveal (decode to digits)",
+      "Lockbox Entry (initiate override)"
     ]
   };
 
@@ -63,45 +70,6 @@
     3: "The journey does not begin at the start. Follow the path as it would be flown — from the farthest point back home.",
     4: "The final code demands stability. Center first. Balance on either side."
   };
-
-  function renderObjectivesAndRiddles(currentStage){
-    // currentStage is 0..4
-    document.querySelectorAll(".step").forEach(stepEl => {
-      const stepNum = parseInt(stepEl.dataset.step, 10);
-      const list = document.getElementById(`obj-${stepNum}`);
-      const riddleBox = document.getElementById(`riddle-${stepNum}`);
-
-      if (!list || !riddleBox) return;
-
-      const isDone = stepNum <= currentStage;
-
-      // stage=0 => mission 1 is active
-      // stage=1 => mission 2 is active
-      // stage=2 => mission 3 is active
-      // stage=3 => mission 4 is active
-      // stage=4 => complete (overtime trigger)
-      const isActive = (currentStage < 4) && (stepNum === (currentStage + 1));
-
-      // Card state classes
-      stepEl.classList.toggle("active", isActive);
-
-      // collapse (hide details) if not active
-      stepEl.classList.toggle("collapsed", !isActive);
-
-      const items = objectivesByStep[stepNum] || [];
-      list.innerHTML = items.map((txt) => {
-        const bullet = isDone ? "✔" : "•";
-        const cls = isDone ? "done" : (isActive ? "active" : "pending");
-        return `<li class="${cls}"><span class="bullet">${bullet}</span><span>${txt}</span></li>`;
-      }).join("");
-
-      const riddleText = orderRiddleByStep[stepNum] || "";
-      riddleBox.innerHTML = `
-        <div class="tag">Order Riddle</div>
-        <div class="riddleText">${riddleText}</div>
-      `;
-    });
-  }
 
   // ---------------------------------
   // DOM
@@ -119,12 +87,18 @@
   const failureOverlay = document.getElementById('failureOverlay');
   const successTimeEl  = document.getElementById('successTime');
 
-  const tracker   = document.getElementById('tracker');
   const header    = document.getElementById('header');
   const subtitle  = document.getElementById('subtitle');
   const countdown = document.getElementById('countdown');
   const countdownLabel = document.getElementById('countdownLabel');
   const countdownWrap  = document.getElementById('countdownWrap');
+
+  const missionItems = Array.from(document.querySelectorAll('.missionItem'));
+
+  const activeTitle = document.getElementById('activeTitle');
+  const activeDesc  = document.getElementById('activeDesc');
+  const activeObjectives = document.getElementById('activeObjectives');
+  const activeRiddle = document.getElementById('activeRiddle');
 
   let endStateShown = false;
   let clockInterval = null;
@@ -132,20 +106,9 @@
   // ---------------------------------
   // Stage overrides (manual testing)
   // ---------------------------------
-  if (stageRaw === 'success') {
-    showSuccessOverlay(true);
-    return;
-  }
-  if (stageRaw === 'failure') {
-    showFailureOverlay(true);
-    return;
-  }
-
-  // Manual testing for overtime mode
-  if (stageRaw === 'overtime') {
-    enterOvertimeMode(true);
-    return;
-  }
+  if (stageRaw === 'success') { showSuccessOverlay(true); return; }
+  if (stageRaw === 'failure') { showFailureOverlay(true); return; }
+  if (stageRaw === 'overtime') { enterOvertimeMode(true); return; }
 
   // ---------------------------------
   // Normal stage handling
@@ -172,23 +135,16 @@
   document.body.style.background = colors[clamped];
   document.body.style.color = textColors[clamped];
 
-  // Update tracker candy canes (done/filled)
-  document.querySelectorAll('.step').forEach(step => {
-    const num = parseInt(step.dataset.step, 10);
-    if (num <= clamped) step.classList.add('done');
-    else step.classList.remove('done');
-  });
-
-  // Objectives + riddles rendering + collapsing logic
-  renderObjectivesAndRiddles(clamped);
-
-  // If midnight already passed, fail immediately unless manually overridden
+  // If midnight already passed, fail immediately (unless already complete)
   if (getTimeRemainingToMidnight() <= 0 && clamped < 4) {
     showFailureOverlay(false);
     return;
   }
 
-  // Normal midnight countdown loop (stops when overtime starts)
+  // Render left list status + right panel content
+  renderSplitUI(clamped);
+
+  // Countdown loop (stops when overtime starts)
   function updateClock(){
     const remaining = getTimeRemainingToMidnight();
 
@@ -197,7 +153,6 @@
       else countdown.textContent = `${formatHMS(remaining)} until midnight`;
     }
 
-    // If time is out during missions 0-3, fail
     if (remaining <= 0 && clamped < 4) {
       showFailureOverlay(false);
     }
@@ -206,14 +161,9 @@
   clockInterval = setInterval(updateClock, 1000);
   updateClock();
 
-  // ---------------------------------
-  // Stage 4 trigger → OVERTIME
-  // ---------------------------------
+  // Stage 4 trigger → glitch → overtime
   if (clamped === 4) {
-    if (clockInterval) {
-      clearInterval(clockInterval);
-      clockInterval = null;
-    }
+    if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
 
     setTimeout(() => {
       document.body.classList.add('glitch');
@@ -225,10 +175,52 @@
   }
 
   // ---------------------------------
+  // Split UI rendering
+  // ---------------------------------
+  function renderSplitUI(currentStage){
+    // currentStage = 0..4
+    // Active mission is step = currentStage+1 (while <4). When stage=4, none active.
+    const activeStep = (currentStage < 4) ? (currentStage + 1) : null;
+
+    missionItems.forEach(el => {
+      const step = parseInt(el.dataset.step, 10);
+      const done = step <= currentStage;
+      const active = (activeStep !== null && step === activeStep);
+
+      el.classList.toggle('done', done);
+      el.classList.toggle('active', active);
+    });
+
+    if (!activeStep) {
+      // completed state (stage=4) – the overtime overlay will take over shortly
+      if (activeTitle) activeTitle.textContent = "All Missions Complete";
+      if (activeDesc) activeDesc.textContent = "Stand by...";
+      if (activeObjectives) activeObjectives.innerHTML = "";
+      if (activeRiddle) activeRiddle.textContent = "—";
+      return;
+    }
+
+    const meta = missionMeta[activeStep] || { title: "—", desc: "—" };
+    if (activeTitle) activeTitle.textContent = meta.title;
+    if (activeDesc) activeDesc.textContent = meta.desc;
+
+    const items = objectivesByStep[activeStep] || [];
+    if (activeObjectives) {
+      activeObjectives.innerHTML = items.map(txt => {
+        return `<li class="active"><span class="bullet">•</span><span>${txt}</span></li>`;
+      }).join("");
+    }
+
+    const r = orderRiddleByStep[activeStep] || "—";
+    if (activeRiddle) activeRiddle.textContent = r;
+  }
+
+  // ---------------------------------
   // Overlay handlers
   // ---------------------------------
   function hideMainUI(){
-    if (tracker) tracker.classList.add('hidden');
+    const splitShell = document.getElementById('splitShell');
+    if (splitShell) splitShell.classList.add('hidden');
     if (header) header.classList.add('hidden');
     if (subtitle) subtitle.classList.add('hidden');
     if (countdownWrap) countdownWrap.classList.add('hidden');
