@@ -44,16 +44,16 @@
 
   // Shorter objective text (TV-friendly)
   const objectivesByStep = {
-    1: ["Puzzle A", "Puzzle B", "Puzzle C"],
-    2: ["Puzzle A", "Puzzle B", "Puzzle C"],
-    3: ["Puzzle A", "Puzzle B", "Puzzle C"],
-    4: ["Puzzle A", "Puzzle B", "Puzzle C"]
+    1: ["Elf Holiday Party", "O'Christmas Tree, O'Christmas Tree", "Naughty or Nice?"],
+    2: ["False Trails in the Snow", "Workshop Shift Log", "Corner the Rogue Elf"],
+    3: ["Navigation Key Recovery", "Flight Path Recovery", "Clear the Airspace!"],
+    4: ["Radio Interference", "Sleigh Systems Startup", "Shield Encryption"]
   };
 
   const orderRiddleByStep = {
     1: "The algorithm favors balance, not impulse. Begin where virtue is least, end where virtue is greatest.",
     2: "Not all numbers are alike. First, those that play fair. Then, those that do not.",
-    3: "The journey does not begin at the start. Follow the path as it would be flown — from the farthest point back home.",
+    3: "The sleigh’s code sorts by magnitude: highest priority first. Zero waits at the end.",
     4: "The final code demands stability. Center first. Balance on either side."
   };
 
